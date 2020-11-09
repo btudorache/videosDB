@@ -19,6 +19,7 @@ public final class Constants {
     public static final String FILMOGRAPHY = "filmography";
     public static final String SUBSCRIPTION = "subscription";
     public static final String FAVORITE_MOVIES = "favourite";
+    public static final String FAVORITE = "favorite";
     public static final String GENRES = "genres";
     public static final String SEASONS = "seasons";
     public static final String CURRENT_SEASON = "current_season";
@@ -33,6 +34,13 @@ public final class Constants {
     public static final String ACTION_TYPE = "action_type";
     public static final String TYPE = "type";
     public static final String USER = "user";
+    public static final String VIEW = "view";
+    public static final String RATING = "rating";
+    public static final String PREMIUM = "premium";
+    public static final String POPULAR = "popular";
+    public static final String SEARCH = "search";
+    public static final String STANDARD = "standard";
+    public static final String BEST_UNSEEN = "best_unseen";
     public static final String ACTIONS = "actions";
     public static final String FILTERS = "filters";
     public static final String SORT = "sort_type";
@@ -53,7 +61,7 @@ public final class Constants {
     public static final String MESSAGE = "message";
     public static final String QUERY = "query";
     public static final String COMMAND = "command";
-    public static final String RECOMMENDATION = "Recommendation";
+    public static final String RECOMMENDATION = "recommendation";
 
     // checker constants
     public static final String ID_STRING = "id";
