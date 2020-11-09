@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
+
 public class Repository {
     /**
      * List of actors
@@ -53,8 +54,22 @@ public class Repository {
         this.arrayResult = arrayResult;
     }
 
-    private void runCommands(ActionInputData action) {
+    private void runCommands(ActionInputData action) throws IOException {
         if (action.getType().equals(Constants.FAVORITE)) {
+            UserInputData user = this.userDict.get(action.getUsername());
+            if (user.getHistory().containsKey(action.getTitle())) {
+                if (user.getFavoriteMovies().contains(action.getTitle())) {
+                    JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "error -> " + action.getTitle() + " is already in favourite list");
+                    this.arrayResult.add((Object) data);
+                } else {
+                    user.getFavoriteMovies().add(action.getTitle());
+                    JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "success -> " + action.getTitle() + " was added as favourite");
+                    this.arrayResult.add(data);
+                }
+            } else {
+                JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "error -> " + action.getTitle() + " is not seen");
+                this.arrayResult.add(data);
+            }
 
         } else if (action.getType().equals(Constants.VIEW)) {
 
