@@ -2,6 +2,7 @@ package database;
 
 import common.Constants;
 import fileio.*;
+import models.User;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -16,10 +17,6 @@ public class Repository {
      */
     private List<ActorInputData> actorsData;
     /**
-     * List of users
-     */
-    private List<UserInputData> usersData;
-    /**
      * List of commands
      */
     private List<ActionInputData> commandsData;
@@ -32,7 +29,8 @@ public class Repository {
      */
     private List<SerialInputData> serialsData;
 
-    private HashMap<String, UserInputData> userDict;
+    private HashMap<String, User> userDict;
+
 
     private Writer fileWriter;
     private JSONArray arrayResult;
@@ -40,13 +38,13 @@ public class Repository {
     public Repository(Input input, Writer fileWriter, JSONArray arrayResult) {
         this.actorsData = input.getActors();
 
-        this.usersData = input.getUsers();
-        this.userDict = new HashMap<String, UserInputData>();
-        for (UserInputData userInfo : this.usersData) {
-            this.userDict.put(userInfo.getUsername(), userInfo);
+        this.userDict = new HashMap<String, User>();
+        for (UserInputData userInfo : input.getUsers()) {
+            this.userDict.put(userInfo.getUsername(), new User(userInfo));
         }
 
         this.commandsData = input.getCommands();
+
         this.moviesData = input.getMovies();
         this.serialsData = input.getSerials();
 
@@ -56,11 +54,11 @@ public class Repository {
 
     private void runCommands(ActionInputData action) throws IOException {
         if (action.getType().equals(Constants.FAVORITE)) {
-            UserInputData user = this.userDict.get(action.getUsername());
+            User user = this.userDict.get(action.getUsername());
             if (user.getHistory().containsKey(action.getTitle())) {
                 if (user.getFavoriteMovies().contains(action.getTitle())) {
                     JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "error -> " + action.getTitle() + " is already in favourite list");
-                    this.arrayResult.add((Object) data);
+                    this.arrayResult.add(data);
                 } else {
                     user.getFavoriteMovies().add(action.getTitle());
                     JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "success -> " + action.getTitle() + " was added as favourite");
@@ -72,6 +70,15 @@ public class Repository {
             }
 
         } else if (action.getType().equals(Constants.VIEW)) {
+            User user = this.userDict.get(action.getUsername());
+            if (user.getHistory().containsKey(action.getTitle())) {
+                int numViews = user.getHistory().get(action.getTitle());
+                user.getHistory().put(action.getTitle(), numViews + 1);
+            } else {
+                user.getHistory().put(action.getTitle(), 1);
+            }
+            JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "success -> " + action.getTitle() + " was viewed with total views of " + user.getHistory().get(action.getTitle()));
+            this.arrayResult.add(data);
 
         } else if (action.getType().equals(Constants.RATING)) {
 

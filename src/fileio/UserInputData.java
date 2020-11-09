@@ -43,6 +43,10 @@ public final class UserInputData {
         return history;
     }
 
+    public ArrayList<String> getFavoriteMovies() { return favoriteMovies; }
+
+    public String getSubscriptionType() { return subscriptionType; }
+
     @Override
     public String toString() {
         return "UserInputData{" + "username='"
