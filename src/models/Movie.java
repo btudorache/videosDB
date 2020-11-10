@@ -3,10 +3,7 @@ package models;
 import common.Constants;
 import fileio.MovieInputData;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class Movie extends Video implements Comparable<Movie> {
     /**
@@ -67,11 +64,19 @@ public class Movie extends Video implements Comparable<Movie> {
         return queryBuilder.toString();
     }
 
-    public static void sortType(String order, ArrayList<Movie> movieList) {
+    public static void sortRating(String order, ArrayList<Movie> movieList) {
         if (order.equals(Constants.ASCENDING)) {
             Collections.sort(movieList);
         } else if (order.equals(Constants.DESCENDING)) {
             Collections.sort(movieList, Collections.reverseOrder());
+        }
+    }
+
+    public static void sortLongest(String order, ArrayList<Movie> movieList) {
+        if (order.equals(Constants.ASCENDING)) {
+            movieList.sort((movie1, movie2) -> movie1.getDuration() - movie2.getDuration());
+        } else if (order.equals(Constants.DESCENDING)) {
+            movieList.sort((movie1, movie2) -> movie2.getDuration() - movie1.getDuration());
         }
     }
 

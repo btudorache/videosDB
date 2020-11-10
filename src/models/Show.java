@@ -83,11 +83,19 @@ public class Show extends Video implements Comparable<Show> {
         return queryBuilder.toString();
     }
 
-    public static void sortType(String order, ArrayList<Show> showList) {
+    public static void sortRating(String order, ArrayList<Show> showList) {
         if (order.equals(Constants.ASCENDING)) {
             Collections.sort(showList);
         } else if (order.equals(Constants.DESCENDING)) {
             Collections.sort(showList, Collections.reverseOrder());
+        }
+    }
+
+    public static void sortLongest(String order, ArrayList<Show> showList) {
+        if (order.equals(Constants.ASCENDING)) {
+            showList.sort((show1, show2) -> show1.getDuration() - show2.getDuration());
+        } else if (order.equals(Constants.DESCENDING)) {
+            showList.sort((show1, show2) -> show2.getDuration() - show1.getDuration());
         }
     }
 
@@ -99,6 +107,14 @@ public class Show extends Video implements Comparable<Show> {
         }
         sum /= this.numberOfSeasons;
         return sum;
+    }
+
+    public int getDuration() {
+        int duration = 0;
+        for (Season season : this.getSeasons()) {
+            duration += season.getDuration();
+        }
+        return duration;
     }
 
     @Override

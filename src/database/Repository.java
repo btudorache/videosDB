@@ -107,26 +107,46 @@ public class Repository {
         if (action.getObjectType().equals(Constants.ACTORS)) {
 
         } else if (action.getObjectType().equals(Constants.MOVIES)) {
+            ArrayList<Movie> moviesFiltered = Movie.findMovies(this.movieDict, action.getFilters());
             if (action.getCriteria().equals(Constants.RATINGS)) {
-                ArrayList<Movie> moviesFiltered = Movie.findMovies(this.movieDict, action.getFilters());
                 if (moviesFiltered.isEmpty()) {
                     JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "Query result: []");
                     this.arrayResult.add(data);
-                }  else {
-                    Movie.sortType(action.getSortType(), moviesFiltered);
+                } else {
+                    Movie.sortRating(action.getSortType(), moviesFiltered);
+                    String stringList = Movie.parseQuery(moviesFiltered);
+                    JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "Query result: " + stringList);
+                    this.arrayResult.add(data);
+                }
+            } else if (action.getCriteria().equals(Constants.LONGEST)) {
+                if (moviesFiltered.isEmpty()) {
+                    JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "Query result: []");
+                    this.arrayResult.add(data);
+                } else {
+                    Movie.sortLongest(action.getSortType(), moviesFiltered);
                     String stringList = Movie.parseQuery(moviesFiltered);
                     JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "Query result: " + stringList);
                     this.arrayResult.add(data);
                 }
             }
         } else if (action.getObjectType().equals(Constants.SHOWS)) {
+            ArrayList<Show> showsFiltered = Show.findShows(this.showDict, action.getFilters());
             if (action.getCriteria().equals(Constants.RATINGS)) {
-                ArrayList<Show> showsFiltered = Show.findShows(this.showDict, action.getFilters());
                 if (showsFiltered.isEmpty()) {
                     JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "Query result: []");
                     this.arrayResult.add(data);
                 } else {
-                    Show.sortType(action.getSortType(), showsFiltered);
+                    Show.sortRating(action.getSortType(), showsFiltered);
+                    String stringList = Show.parseQuery(showsFiltered);
+                    JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "Query result: " + stringList);
+                    this.arrayResult.add(data);
+                }
+            } else if (action.getCriteria().equals(Constants.LONGEST)) {
+                if (showsFiltered.isEmpty()) {
+                    JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "Query result: []");
+                    this.arrayResult.add(data);
+                } else {
+                    Show.sortLongest(action.getSortType(), showsFiltered);
                     String stringList = Show.parseQuery(showsFiltered);
                     JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "Query result: " + stringList);
                     this.arrayResult.add(data);
