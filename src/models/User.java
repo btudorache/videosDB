@@ -3,7 +3,6 @@ package models;
 import fileio.UserInputData;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 public class User {
@@ -24,8 +23,6 @@ public class User {
      */
     private ArrayList<String> favoriteMovies;
     private int numRatings;
-    private ArrayList<String> moviesRated;
-    private HashMap<String, ArrayList<Integer>> showsRated;
 
     public User(UserInputData userData) {
         this.username = userData.getUsername();
@@ -33,9 +30,6 @@ public class User {
         this.favoriteMovies = userData.getFavoriteMovies();
         this.history = userData.getHistory();
         this.numRatings = 0;
-
-        this.moviesRated = new ArrayList<String>();
-        this.showsRated = new HashMap<String, ArrayList<Integer>>();
     }
 
     public String getUsername() {
@@ -56,13 +50,5 @@ public class User {
 
     public int getNumRatings() {
         return numRatings;
-    }
-
-    public ArrayList<String> getMoviesRated() {
-        return moviesRated;
-    }
-
-    public HashMap<String, ArrayList<Integer>> getSeriesRated() {
-        return showsRated;
     }
 }

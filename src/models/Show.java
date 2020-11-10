@@ -15,6 +15,7 @@ public class Show extends Video {
      */
     private final ArrayList<Season> seasons;
 
+
     public Show(SerialInputData showData) {
         super(showData.getTitle(), showData.getYear(), showData.getCast(), showData.getGenres());
         this.numberOfSeasons = showData.getNumberSeason();
@@ -27,6 +28,21 @@ public class Show extends Video {
 
     public ArrayList<Season> getSeasons() {
         return seasons;
+    }
+
+    public void addRating(double rate, int seasonNum) {
+        Season season = this.getSeasons().get(seasonNum - 1);
+        season.addRating(rate);
+    }
+
+    @Override
+    public double getRating() {
+        double sum = 0;
+        for (Season season : this.getSeasons()) {
+            sum += season.getRatingMean();
+        }
+        sum /= this.numberOfSeasons;
+        return sum;
     }
 
     @Override

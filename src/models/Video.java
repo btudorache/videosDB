@@ -19,10 +19,8 @@ public abstract class Video {
      * Video genres
      */
     private ArrayList<String> genres;
-    /**
-     * Video
-     */
-    private double rating;
+
+    protected double rating;
 
     public Video(final String title, final int year, final ArrayList<String> cast, final ArrayList<String> genres) {
         this.title = title;

@@ -2,11 +2,15 @@ package database;
 
 import common.Constants;
 import fileio.*;
+import models.Movie;
+import models.Show;
 import models.User;
+import models.Video;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -20,17 +24,14 @@ public class Repository {
      * List of commands
      */
     private List<ActionInputData> commandsData;
-    /**
-     * List of movies
-     */
-    private List<MovieInputData> moviesData;
-    /**
-     * List of serials aka tv shows
-     */
-    private List<SerialInputData> serialsData;
 
     private HashMap<String, User> userDict;
 
+    private HashMap<String, Movie> movieDict;
+    private ArrayList<Movie> movieList;
+
+    private HashMap<String, Show> showDict;
+    private ArrayList<Show> showList;
 
     private Writer fileWriter;
     private JSONArray arrayResult;
@@ -39,14 +40,27 @@ public class Repository {
         this.actorsData = input.getActors();
 
         this.userDict = new HashMap<String, User>();
-        for (UserInputData userInfo : input.getUsers()) {
-            this.userDict.put(userInfo.getUsername(), new User(userInfo));
+        for (UserInputData userData : input.getUsers()) {
+            this.userDict.put(userData.getUsername(), new User(userData));
         }
 
         this.commandsData = input.getCommands();
 
-        this.moviesData = input.getMovies();
-        this.serialsData = input.getSerials();
+        this.movieDict = new HashMap<String, Movie>();
+        this.movieList = new ArrayList<Movie>();
+        for (MovieInputData movieData : input.getMovies()) {
+            Movie newMovie = new Movie(movieData);
+            this.movieDict.put(movieData.getTitle(), newMovie);
+            this.movieList.add(newMovie);
+        }
+
+        this.showDict = new HashMap<String, Show>();
+        this.showList = new ArrayList<Show>();
+        for (SerialInputData showData : input.getSerials()) {
+            Show newShow = new Show(showData);
+            this.showDict.put(showData.getTitle(), newShow);
+            this.showList.add(newShow);
+        }
 
         this.fileWriter = fileWriter;
         this.arrayResult = arrayResult;
@@ -81,7 +95,16 @@ public class Repository {
             this.arrayResult.add(data);
 
         } else if (action.getType().equals(Constants.RATING)) {
+            if (this.movieDict.containsKey(action.getTitle())) {
+                this.movieDict.get(action.getTitle()).addRating(action.getGrade());
+                JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "success -> " + action.getTitle() + " was rated with " + action.getGrade() + " by " + action.getUsername());
+                this.arrayResult.add(data);
 
+            } else if (this.showDict.containsKey(action.getTitle())) {
+                this.showDict.get(action.getTitle()).addRating(action.getGrade(), action.getSeasonNumber());
+                JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "success -> " + action.getTitle() + " was rated with " + action.getGrade() + " by " + action.getUsername());
+                this.arrayResult.add(data);
+            }
         }
     }
 
@@ -89,6 +112,8 @@ public class Repository {
         if (action.getObjectType().equals(Constants.ACTORS)) {
 
         } else if (action.getObjectType().equals(Constants.MOVIES)) {
+
+        } else if (action.getObjectType().equals(Constants.SHOWS)) {
 
         } else if (action.getObjectType().equals(Constants.USERS)) {
 

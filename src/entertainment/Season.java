@@ -44,6 +44,19 @@ public final class Season {
         this.ratings = ratings;
     }
 
+    public void addRating(double rating) {
+        this.ratings.add(rating);
+    }
+
+    public double getRatingMean() {
+        double sum = 0;
+        for (double rating : this.ratings) {
+            sum += rating;
+        }
+        sum /= this.ratings.size();
+        return sum;
+    }
+
     @Override
     public String toString() {
         return "Episode{"
