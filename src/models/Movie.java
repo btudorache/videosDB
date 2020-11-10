@@ -52,14 +52,15 @@ public class Movie extends Video implements Comparable<Movie> {
         return movieList;
     }
 
-    public static String parseQuery(ArrayList<Movie> movieList) {
+    public static String parseQuery(ArrayList<Movie> movieList, int numMovies) {
         StringBuilder queryBuilder = new StringBuilder();
         queryBuilder.append('[');
-        for (int i = 0; i < movieList.size() - 1; i++) {
+        int moviesNumber = Math.min(numMovies, movieList.size());
+        for (int i = 0; i < moviesNumber - 1; i++) {
             queryBuilder.append(movieList.get(i).getTitle());
             queryBuilder.append(", ");
         }
-        queryBuilder.append(movieList.get(movieList.size() - 1).getTitle());
+        queryBuilder.append(movieList.get(moviesNumber - 1).getTitle());
         queryBuilder.append(']');
         return queryBuilder.toString();
     }

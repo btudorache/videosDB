@@ -1,8 +1,11 @@
 package models;
 
+import common.Constants;
 import fileio.UserInputData;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Map;
 
 public class User {
@@ -32,6 +35,10 @@ public class User {
         this.numRatings = 0;
     }
 
+    public void incrementNumRatings() {
+        this.numRatings++;
+    }
+
     public String getUsername() {
         return username;
     }
@@ -50,5 +57,34 @@ public class User {
 
     public int getNumRatings() {
         return numRatings;
+    }
+
+    public static String getUsersQuery(HashMap<String, User> userDict, String order, int numUsers) {
+        ArrayList<User> userList = new ArrayList<User>();
+        for (User user : userDict.values()) {
+            if (user.getNumRatings() > 0) {
+                userList.add(user);
+            }
+        }
+        if (userList.isEmpty()) {
+            return "[]";
+        }
+
+        if (order.equals(Constants.ASCENDING)) {
+            userList.sort((user1, user2) -> user1.getNumRatings() - user2.getNumRatings());
+        } else if (order.equals(Constants.DESCENDING)) {
+            userList.sort((user1, user2) -> user2.getNumRatings() - user1.getNumRatings());
+        }
+
+        StringBuilder builder = new StringBuilder();
+        builder.append('[');
+        int usersNumber = Math.min(numUsers, userList.size());
+        for (int i = 0; i < usersNumber - 1; i++) {
+            builder.append(userList.get(i).getUsername());
+            builder.append(", ");
+        }
+        builder.append(userList.get(usersNumber - 1).getUsername());
+        builder.append(']');
+        return builder.toString();
     }
 }

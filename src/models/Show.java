@@ -71,14 +71,15 @@ public class Show extends Video implements Comparable<Show> {
         return showList;
     }
 
-    public static String parseQuery(ArrayList<Show> showList) {
+    public static String parseQuery(ArrayList<Show> showList, int numShows) {
         StringBuilder queryBuilder = new StringBuilder();
         queryBuilder.append('[');
-        for (int i = 0; i < showList.size() - 1; i++) {
+        int showsNumber = Math.min(numShows, showList.size());
+        for (int i = 0; i < showsNumber - 1; i++) {
             queryBuilder.append(showList.get(i).getTitle());
             queryBuilder.append(", ");
         }
-        queryBuilder.append(showList.get(showList.size() - 1).getTitle());
+        queryBuilder.append(showList.get(showsNumber - 1).getTitle());
         queryBuilder.append(']');
         return queryBuilder.toString();
     }

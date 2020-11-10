@@ -86,6 +86,7 @@ public class Repository {
         } else if (action.getType().equals(Constants.RATING)) {
             User user = this.userDict.get(action.getUsername());
             if (user.getHistory().containsKey(action.getTitle())){
+                user.incrementNumRatings();
                 if (this.movieDict.containsKey(action.getTitle())) {
                     this.movieDict.get(action.getTitle()).addRating(action.getGrade());
                     JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "success -> " + action.getTitle() + " was rated with " + action.getGrade() + " by " + action.getUsername());
@@ -114,7 +115,7 @@ public class Repository {
                     this.arrayResult.add(data);
                 } else {
                     Movie.sortRating(action.getSortType(), moviesFiltered);
-                    String stringList = Movie.parseQuery(moviesFiltered);
+                    String stringList = Movie.parseQuery(moviesFiltered, action.getNumber());
                     JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "Query result: " + stringList);
                     this.arrayResult.add(data);
                 }
@@ -124,11 +125,12 @@ public class Repository {
                     this.arrayResult.add(data);
                 } else {
                     Movie.sortLongest(action.getSortType(), moviesFiltered);
-                    String stringList = Movie.parseQuery(moviesFiltered);
+                    String stringList = Movie.parseQuery(moviesFiltered, action.getNumber());
                     JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "Query result: " + stringList);
                     this.arrayResult.add(data);
                 }
             }
+
         } else if (action.getObjectType().equals(Constants.SHOWS)) {
             ArrayList<Show> showsFiltered = Show.findShows(this.showDict, action.getFilters());
             if (action.getCriteria().equals(Constants.RATINGS)) {
@@ -137,7 +139,7 @@ public class Repository {
                     this.arrayResult.add(data);
                 } else {
                     Show.sortRating(action.getSortType(), showsFiltered);
-                    String stringList = Show.parseQuery(showsFiltered);
+                    String stringList = Show.parseQuery(showsFiltered, action.getNumber());
                     JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "Query result: " + stringList);
                     this.arrayResult.add(data);
                 }
@@ -147,14 +149,18 @@ public class Repository {
                     this.arrayResult.add(data);
                 } else {
                     Show.sortLongest(action.getSortType(), showsFiltered);
-                    String stringList = Show.parseQuery(showsFiltered);
+                    String stringList = Show.parseQuery(showsFiltered, action.getNumber());
                     JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "Query result: " + stringList);
                     this.arrayResult.add(data);
                 }
             }
 
         } else if (action.getObjectType().equals(Constants.USERS)) {
-
+            if (action.getCriteria().equals(Constants.NUM_RATINGS)) {
+                String stringList = User.getUsersQuery(this.userDict, action.getSortType(), action.getNumber());
+                JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "Query result: " + stringList);
+                this.arrayResult.add(data);
+            }
         }
     }
 
