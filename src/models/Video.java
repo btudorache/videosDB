@@ -19,8 +19,11 @@ public abstract class Video {
      * Video genres
      */
     private ArrayList<String> genres;
-
+    /**
+     * Video
+     */
     protected double rating;
+    protected int numRatings;
 
     public Video(final String title, final int year, final ArrayList<String> cast, final ArrayList<String> genres) {
         this.title = title;
@@ -28,6 +31,11 @@ public abstract class Video {
         this.cast = cast;
         this.genres = genres;
         this.rating = 0;
+        this.numRatings = 0;
+    }
+
+    public void addRating(double rate, int season) {
+
     }
 
     public String getTitle() {
@@ -48,5 +56,9 @@ public abstract class Video {
 
     public double getRating() {
         return rating;
+    }
+
+    public int getNumRatings(){
+        return numRatings;
     }
 }

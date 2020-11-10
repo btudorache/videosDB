@@ -1,11 +1,15 @@
 package models;
 
+import common.Constants;
 import entertainment.Season;
 import fileio.SerialInputData;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 
-public class Show extends Video {
+public class Show extends Video implements Comparable<Show> {
     /**
      * Number of seasons
      */
@@ -35,6 +39,58 @@ public class Show extends Video {
         season.addRating(rate);
     }
 
+    public static ArrayList<Show> findShows(HashMap<String, Show> shows, List<List<String>> filters) {
+        ArrayList<Show> showList = new ArrayList<Show>();
+        // if both filter present
+        if (filters.get(0) != null && filters.get(1) != null) {
+            for (Show show : shows.values()) {
+                if (filters.get(0).get(0) != null &&
+                    show.getYear() == Integer.parseInt(filters.get(0).get(0)) &&
+                    show.getGenres().containsAll(filters.get(1))) {
+                    showList.add(show);
+                }
+            }
+            // if only year filter
+        } else if (filters.get(0) != null) {
+            for (Show show : shows.values()) {
+                if (show.getYear() == Integer.parseInt(filters.get(0).get(0))) {
+                    showList.add(show);
+                }
+            }
+            // if only genre filter
+        } else if (filters.get(1) != null) {
+            for (Show show : shows.values()) {
+                if (show.getGenres().containsAll(filters.get(1))) {
+                    showList.add(show);
+                }
+            }
+            // if no filter
+        } else {
+            showList.addAll(shows.values());
+        }
+        return showList;
+    }
+
+    public static String parseQuery(ArrayList<Show> showList) {
+        StringBuilder queryBuilder = new StringBuilder();
+        queryBuilder.append('[');
+        for (int i = 0; i < showList.size() - 1; i++) {
+            queryBuilder.append(showList.get(i).getTitle());
+            queryBuilder.append(", ");
+        }
+        queryBuilder.append(showList.get(showList.size() - 1).getTitle());
+        queryBuilder.append(']');
+        return queryBuilder.toString();
+    }
+
+    public static void sortType(String order, ArrayList<Show> showList) {
+        if (order.equals(Constants.ASCENDING)) {
+            Collections.sort(showList);
+        } else if (order.equals(Constants.DESCENDING)) {
+            Collections.sort(showList, Collections.reverseOrder());
+        }
+    }
+
     @Override
     public double getRating() {
         double sum = 0;
@@ -43,6 +99,15 @@ public class Show extends Video {
         }
         sum /= this.numberOfSeasons;
         return sum;
+    }
+
+    @Override
+    public int compareTo(Show that) {
+        if (Double.compare(this.getRating(), that.getRating()) == 0) {
+            return this.getTitle().compareTo(that.getTitle());
+        } else {
+            return Double.compare(this.getRating(), that.getRating());
+        }
     }
 
     @Override

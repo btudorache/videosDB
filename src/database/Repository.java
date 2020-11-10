@@ -5,14 +5,11 @@ import fileio.*;
 import models.Movie;
 import models.Show;
 import models.User;
-import models.Video;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 
 public class Repository {
@@ -28,10 +25,8 @@ public class Repository {
     private HashMap<String, User> userDict;
 
     private HashMap<String, Movie> movieDict;
-    private ArrayList<Movie> movieList;
 
     private HashMap<String, Show> showDict;
-    private ArrayList<Show> showList;
 
     private Writer fileWriter;
     private JSONArray arrayResult;
@@ -47,19 +42,13 @@ public class Repository {
         this.commandsData = input.getCommands();
 
         this.movieDict = new HashMap<String, Movie>();
-        this.movieList = new ArrayList<Movie>();
         for (MovieInputData movieData : input.getMovies()) {
-            Movie newMovie = new Movie(movieData);
-            this.movieDict.put(movieData.getTitle(), newMovie);
-            this.movieList.add(newMovie);
+            this.movieDict.put(movieData.getTitle(), new Movie(movieData));
         }
 
         this.showDict = new HashMap<String, Show>();
-        this.showList = new ArrayList<Show>();
         for (SerialInputData showData : input.getSerials()) {
-            Show newShow = new Show(showData);
-            this.showDict.put(showData.getTitle(), newShow);
-            this.showList.add(newShow);
+            this.showDict.put(showData.getTitle(), new Show(showData));
         }
 
         this.fileWriter = fileWriter;
@@ -95,25 +84,54 @@ public class Repository {
             this.arrayResult.add(data);
 
         } else if (action.getType().equals(Constants.RATING)) {
-            if (this.movieDict.containsKey(action.getTitle())) {
-                this.movieDict.get(action.getTitle()).addRating(action.getGrade());
-                JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "success -> " + action.getTitle() + " was rated with " + action.getGrade() + " by " + action.getUsername());
-                this.arrayResult.add(data);
+            User user = this.userDict.get(action.getUsername());
+            if (user.getHistory().containsKey(action.getTitle())){
+                if (this.movieDict.containsKey(action.getTitle())) {
+                    this.movieDict.get(action.getTitle()).addRating(action.getGrade());
+                    JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "success -> " + action.getTitle() + " was rated with " + action.getGrade() + " by " + action.getUsername());
+                    this.arrayResult.add(data);
 
-            } else if (this.showDict.containsKey(action.getTitle())) {
-                this.showDict.get(action.getTitle()).addRating(action.getGrade(), action.getSeasonNumber());
-                JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "success -> " + action.getTitle() + " was rated with " + action.getGrade() + " by " + action.getUsername());
+                } else if (this.showDict.containsKey(action.getTitle())) {
+                    this.showDict.get(action.getTitle()).addRating(action.getGrade(), action.getSeasonNumber());
+                    JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "success -> " + action.getTitle() + " was rated with " + action.getGrade() + " by " + action.getUsername());
+                    this.arrayResult.add(data);
+                }
+            } else {
+                JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "error -> " + action.getTitle() + " is not seen");
                 this.arrayResult.add(data);
             }
         }
     }
 
-    private void runQueries(ActionInputData action) {
+    private void runQueries(ActionInputData action) throws IOException {
         if (action.getObjectType().equals(Constants.ACTORS)) {
 
         } else if (action.getObjectType().equals(Constants.MOVIES)) {
-
+            if (action.getCriteria().equals(Constants.RATINGS)) {
+                ArrayList<Movie> moviesFiltered = Movie.findMovies(this.movieDict, action.getFilters());
+                if (moviesFiltered.isEmpty()) {
+                    JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "Query result: []");
+                    this.arrayResult.add(data);
+                }  else {
+                    Movie.sortType(action.getSortType(), moviesFiltered);
+                    String stringList = Movie.parseQuery(moviesFiltered);
+                    JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "Query result: " + stringList);
+                    this.arrayResult.add(data);
+                }
+            }
         } else if (action.getObjectType().equals(Constants.SHOWS)) {
+            if (action.getCriteria().equals(Constants.RATINGS)) {
+                ArrayList<Show> showsFiltered = Show.findShows(this.showDict, action.getFilters());
+                if (showsFiltered.isEmpty()) {
+                    JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "Query result: []");
+                    this.arrayResult.add(data);
+                } else {
+                    Show.sortType(action.getSortType(), showsFiltered);
+                    String stringList = Show.parseQuery(showsFiltered);
+                    JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "Query result: " + stringList);
+                    this.arrayResult.add(data);
+                }
+            }
 
         } else if (action.getObjectType().equals(Constants.USERS)) {
 
