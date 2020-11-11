@@ -4,6 +4,7 @@ import entertainment.Season;
 import fileio.SerialInputData;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Show extends Video  {
     /**
@@ -39,14 +40,23 @@ public class Show extends Video  {
     @Override
     public double getRating() {
         double sum = 0;
+        int numRatings = 0;
         for (Season season : this.getSeasons()) {
-            sum += season.getRatingMean();
+            List<Double> doubleArrayList = season.getRatings();
+            double seasonMean = 0;
+            for (Double rating : doubleArrayList) {
+                seasonMean += rating;
+            }
+            if (seasonMean != 0) {
+                seasonMean /= doubleArrayList.size();
+            }
+            sum +=seasonMean;
         }
 
         if (sum == 0) {
             return 0;
         }
-        sum /= this.numberOfSeasons;
+        sum /= this.getSeasons().size();
         return sum;
     }
     @Override

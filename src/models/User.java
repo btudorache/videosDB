@@ -22,6 +22,8 @@ public class User {
      * Movies added to favorites
      */
     private ArrayList<String> favoriteMovies;
+
+    private ArrayList<String> ratedVideos;
     private int numRatings;
 
     public User(UserInputData userData) {
@@ -30,6 +32,8 @@ public class User {
         this.favoriteMovies = userData.getFavoriteMovies();
         this.history = userData.getHistory();
         this.numRatings = 0;
+
+        this.ratedVideos = new ArrayList<>();
     }
 
     public void incrementNumRatings() {
@@ -163,5 +167,13 @@ public class User {
             builder.append(']');
             return builder.toString();
         }
+    }
+
+    public ArrayList<String> getRatedVideos() {
+        return ratedVideos;
+    }
+
+    public void addToRated(String title) {
+        this.ratedVideos.add(title);
     }
 }

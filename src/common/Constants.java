@@ -39,6 +39,7 @@ public final class Constants {
     public static final String RATINGS = "ratings";
     public static final String PREMIUM = "PREMIUM";
     public static final String POPULAR = "popular";
+    public static final String AVERAGE = "average";
     public static final String ASCENDING = "asc";
     public static final String DESCENDING = "desc";
     public static final String LONGEST = "longest";

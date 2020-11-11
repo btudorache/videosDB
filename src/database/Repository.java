@@ -97,13 +97,21 @@ public class Repository {
             if (user.getHistory().containsKey(action.getTitle())){
                 user.incrementNumRatings();
                 if (this.movieDict.containsKey(action.getTitle())) {
-                    this.movieDict.get(action.getTitle()).addRating(action.getGrade(), 0);
-                    writeMessage(action.getActionId(), "", "success -> " + action.getTitle() + " was rated with " + action.getGrade() + " by " + action.getUsername());
-
+                    if (user.getRatedVideos().contains(action.getTitle())) {
+                        writeMessage(action.getActionId(), "", "error -> " + action.getTitle() + " has been already rated" );
+                    } else {
+                        this.movieDict.get(action.getTitle()).addRating(action.getGrade(), 0);
+                        user.addToRated(action.getTitle());
+                        writeMessage(action.getActionId(), "", "success -> " + action.getTitle() + " was rated with " + action.getGrade() + " by " + action.getUsername());
+                    }
                 } else if (this.showDict.containsKey(action.getTitle())) {
-                    this.showDict.get(action.getTitle()).addRating(action.getGrade(), action.getSeasonNumber());
-                    writeMessage(action.getActionId(), "", "success -> " + action.getTitle() + " was rated with " + action.getGrade() + " by " + action.getUsername());
-
+                    if (user.getRatedVideos().contains(action.getTitle())) {
+                        writeMessage(action.getActionId(), "", "error -> " + action.getTitle() + " has been already rated" );
+                    } else {
+                        this.showDict.get(action.getTitle()).addRating(action.getGrade(), action.getSeasonNumber());
+                        user.addToRated(action.getTitle());
+                        writeMessage(action.getActionId(), "", "success -> " + action.getTitle() + " was rated with " + action.getGrade() + " by " + action.getUsername());
+                    }
                 }
             } else {
                 writeMessage(action.getActionId(), "", "error -> " + action.getTitle() + " is not seen");
@@ -123,8 +131,11 @@ public class Repository {
         }
     }
 
-    private void runActorQueries(ActionInputData action) {
-
+    private void runActorQueries(ActionInputData action) throws IOException {
+        if (action.getCriteria().equals(Constants.AVERAGE)) {
+            String queryString = Actor.actorsQueryAverage(actorDict, movieDict, showDict, action);
+            writeMessage(action.getActionId(), "", queryString);
+        }
     }
 
     private void runMovieQueries(ActionInputData action) throws IOException {
