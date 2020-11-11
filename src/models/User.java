@@ -85,9 +85,9 @@ public class User {
         return builder.toString();
     }
 
-    public ArrayList<Video> getUnseenVideos(LinkedHashSet<String> videoSet, HashMap<String, Movie> movieDict, HashMap<String, Show> showDict) {
+    public ArrayList<Video> getUnseenVideos(LinkedHashSet<String> videoSet, HashMap<String, Video> movieDict, HashMap<String, Video> showDict) {
         videoSet.removeAll(getHistory().keySet());
-        ArrayList<Video> videoList = new ArrayList<Video>();
+        ArrayList<Video> videoList = new ArrayList<>();
         for (String title : videoSet) {
             if (movieDict.containsKey(title)) {
                 videoList.add(movieDict.get(title));
@@ -100,11 +100,11 @@ public class User {
     }
 
     public ArrayList<Video> getUnseenVideosByGenre(LinkedHashSet<String> videoSet,
-                                            HashMap<String, Movie> movieDict,
-                                            HashMap<String, Show> showDict,
+                                            HashMap<String, Video> movieDict,
+                                            HashMap<String, Video> showDict,
                                             String genre) {
         videoSet.removeAll(getHistory().keySet());
-        ArrayList<Video> videoList = new ArrayList<Video>();
+        ArrayList<Video> videoList = new ArrayList<>();
         for (String title : videoSet) {
             if (movieDict.containsKey(title) && movieDict.get(title).getGenres().contains(genre)) {
                 videoList.add(movieDict.get(title));
@@ -116,7 +116,7 @@ public class User {
         return videoList;
     }
 
-    public String recommendStandard(LinkedHashSet<String> videoSet, HashMap<String, Movie> movieDict, HashMap<String, Show> showDict) {
+    public String recommendStandard(LinkedHashSet<String> videoSet, HashMap<String, Video> movieDict, HashMap<String, Video> showDict) {
         ArrayList<Video> videoList = getUnseenVideos(videoSet, movieDict, showDict);
         if (videoList.isEmpty()) {
             return "StandardRecommendation cannot be applied!";
@@ -125,7 +125,7 @@ public class User {
         }
     }
 
-    public String recommendBestUnseen(LinkedHashSet<String> videoSet, HashMap<String, Movie> movieDict, HashMap<String, Show> showDict) {
+    public String recommendBestUnseen(LinkedHashSet<String> videoSet, HashMap<String, Video> movieDict, HashMap<String, Video> showDict) {
         ArrayList<Video> videoList = getUnseenVideos(videoSet, movieDict, showDict);
         if (videoList.isEmpty()) {
             return "BestRatedUnseenRecommendation cannot be applied!";
@@ -145,8 +145,8 @@ public class User {
     }
 
     public String recommendSearch(LinkedHashSet<String> videoSet,
-                                  HashMap<String, Movie> movieDict,
-                                  HashMap<String, Show> showDict,
+                                  HashMap<String, Video> movieDict,
+                                  HashMap<String, Video> showDict,
                                   String genre) {
         ArrayList<Video> videoList = getUnseenVideosByGenre(videoSet, movieDict, showDict, genre);
         if (videoList.isEmpty()) {

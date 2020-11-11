@@ -5,6 +5,7 @@ import fileio.*;
 import models.Movie;
 import models.Show;
 import models.User;
+import models.Video;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -26,9 +27,9 @@ public class Repository {
 
     private LinkedHashSet<String> videoSet;
 
-    private HashMap<String, Movie> movieDict;
+    private HashMap<String, Video> movieDict;
 
-    private HashMap<String, Show> showDict;
+    private HashMap<String, Video> showDict;
 
     private Writer fileWriter;
     private JSONArray arrayResult;
@@ -45,13 +46,13 @@ public class Repository {
 
         this.videoSet = new LinkedHashSet<String>();
 
-        this.movieDict = new HashMap<String, Movie>();
+        this.movieDict = new HashMap<String, Video>();
         for (MovieInputData movieData : input.getMovies()) {
             this.videoSet.add(movieData.getTitle());
             this.movieDict.put(movieData.getTitle(), new Movie(movieData));
         }
 
-        this.showDict = new HashMap<String, Show>();
+        this.showDict = new HashMap<String, Video>();
         for (SerialInputData showData : input.getSerials()) {
             this.videoSet.add(showData.getTitle());
             this.showDict.put(showData.getTitle(), new Show(showData));
@@ -94,7 +95,7 @@ public class Repository {
             if (user.getHistory().containsKey(action.getTitle())){
                 user.incrementNumRatings();
                 if (this.movieDict.containsKey(action.getTitle())) {
-                    this.movieDict.get(action.getTitle()).addRating(action.getGrade());
+                    this.movieDict.get(action.getTitle()).addRating(action.getGrade(), 0);
                     JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "success -> " + action.getTitle() + " was rated with " + action.getGrade() + " by " + action.getUsername());
                     this.arrayResult.add(data);
 
@@ -127,7 +128,7 @@ public class Repository {
     }
 
     private void runMovieQueries(ActionInputData action) throws IOException {
-        ArrayList<Movie> moviesFiltered = Movie.findMovies(this.movieDict, action.getFilters());
+        ArrayList<Video> moviesFiltered = Video.findShows(this.movieDict, action.getFilters());
         if (action.getCriteria().equals(Constants.RATINGS)) {
             if (moviesFiltered.isEmpty()) {
                 JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "Query result: []");
@@ -152,7 +153,7 @@ public class Repository {
     }
 
     private void runShowQueries(ActionInputData action) throws IOException {
-        ArrayList<Show> showsFiltered = Show.findShows(this.showDict, action.getFilters());
+        ArrayList<Video> showsFiltered = Video.findShows(this.showDict, action.getFilters());
         if (action.getCriteria().equals(Constants.RATINGS)) {
             if (showsFiltered.isEmpty()) {
                 JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "Query result: []");

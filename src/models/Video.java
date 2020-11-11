@@ -1,8 +1,13 @@
 package models;
 
-import java.util.ArrayList;
+import common.Constants;
 
-public class Video implements Comparable<Video> {
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+
+public abstract class Video implements Comparable<Video> {
     /**
      * Video's title
      */
@@ -34,9 +39,7 @@ public class Video implements Comparable<Video> {
         this.numRatings = 0;
     }
 
-    public void addRating(double rate, int season) {
-
-    }
+    public abstract void addRating(double rate, int season);
 
     public String getTitle() {
         return title;
@@ -61,6 +64,69 @@ public class Video implements Comparable<Video> {
     public int getNumRatings(){
         return numRatings;
     }
+
+    public static ArrayList<Video> findShows(HashMap<String, Video> videos, List<List<String>> filters) {
+        ArrayList<Video> videoList = new ArrayList<>();
+        // if both filter present
+        if (filters.get(0) != null && filters.get(1) != null) {
+            for (Video video : videos.values()) {
+                if (filters.get(0).get(0) != null &&
+                        video.getYear() == Integer.parseInt(filters.get(0).get(0)) &&
+                        video.getGenres().containsAll(filters.get(1))) {
+                    videoList.add(video);
+                }
+            }
+            // if only year filter
+        } else if (filters.get(0) != null) {
+            for (Video video : videos.values()) {
+                if (video.getYear() == Integer.parseInt(filters.get(0).get(0))) {
+                    videoList.add(video);
+                }
+            }
+            // if only genre filter
+        } else if (filters.get(1) != null) {
+            for (Video video : videos.values()) {
+                if (video.getGenres().containsAll(filters.get(1))) {
+                    videoList.add(video);
+                }
+            }
+            // if no filter
+        } else {
+            videoList.addAll(videos.values());
+        }
+        return videoList;
+    }
+
+    public static String parseQuery(ArrayList<Video> videoList, int numShows) {
+        StringBuilder queryBuilder = new StringBuilder();
+        queryBuilder.append('[');
+        int showsNumber = Math.min(numShows, videoList.size());
+        for (int i = 0; i < showsNumber - 1; i++) {
+            queryBuilder.append(videoList.get(i).getTitle());
+            queryBuilder.append(", ");
+        }
+        queryBuilder.append(videoList.get(showsNumber - 1).getTitle());
+        queryBuilder.append(']');
+        return queryBuilder.toString();
+    }
+
+    public static void sortRating(String order, ArrayList<Video> videoList) {
+        if (order.equals(Constants.ASCENDING)) {
+            Collections.sort(videoList);
+        } else if (order.equals(Constants.DESCENDING)) {
+            Collections.sort(videoList, Collections.reverseOrder());
+        }
+    }
+
+    public static void sortLongest(String order, ArrayList<Video> videoList) {
+        if (order.equals(Constants.ASCENDING)) {
+            videoList.sort((show1, show2) -> show1.getDuration() - show2.getDuration());
+        } else if (order.equals(Constants.DESCENDING)) {
+            videoList.sort((show1, show2) -> show2.getDuration() - show1.getDuration());
+        }
+    }
+
+    abstract int getDuration();
 
     @Override
     public int compareTo(Video that) {
