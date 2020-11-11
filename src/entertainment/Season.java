@@ -53,6 +53,10 @@ public final class Season {
         for (double rating : this.ratings) {
             sum += rating;
         }
+
+        if (sum == 0) {
+            return 0;
+        }
         sum /= this.ratings.size();
         return sum;
     }

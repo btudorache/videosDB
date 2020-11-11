@@ -3,10 +3,7 @@ package models;
 import common.Constants;
 import fileio.UserInputData;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class User {
     /**
@@ -86,5 +83,47 @@ public class User {
         builder.append(userList.get(usersNumber - 1).getUsername());
         builder.append(']');
         return builder.toString();
+    }
+
+    public ArrayList<Video> getUnseenVideos(LinkedHashSet<String> videoSet, HashMap<String, Movie> movieDict, HashMap<String, Show> showDict) {
+        videoSet.removeAll(getHistory().keySet());
+        ArrayList<Video> videoList = new ArrayList<Video>();
+        for (String title : videoSet) {
+            if (movieDict.containsKey(title)) {
+                videoList.add(movieDict.get(title));
+            } else if (showDict.containsKey(title)) {
+                videoList.add(showDict.get(title));
+            }
+        }
+
+        return videoList;
+    }
+
+    public String recommendStandard(LinkedHashSet<String> videoSet, HashMap<String, Movie> movieDict, HashMap<String, Show> showDict) {
+        ArrayList<Video> videoList = getUnseenVideos(videoSet, movieDict, showDict);
+        if (videoList.isEmpty()) {
+            return "StandardRecommendation cannot be applied!";
+        } else {
+            return "StandardRecommendation result: " + videoList.get(0).getTitle();
+        }
+    }
+
+    public String recommendBestUnseen(LinkedHashSet<String> videoSet, HashMap<String, Movie> movieDict, HashMap<String, Show> showDict) {
+        ArrayList<Video> videoList = getUnseenVideos(videoSet, movieDict, showDict);
+        if (videoList.isEmpty()) {
+            return "BestRatedUnseenRecommendation cannot be applied!";
+        } else {
+            Collections.sort(videoList, Collections.reverseOrder(new Comparator<Video>() {
+                @Override
+                public int compare(Video video1, Video video2) {
+                    if (Double.compare(video1.getRating(), video2.getRating()) == 0) {
+                        return video2.getTitle().compareTo(video1.getTitle());
+                    } else {
+                        return Double.compare(video1.getRating(), video2.getRating());
+                    }
+                }
+            }));
+            return "BestRatedUnseenRecommendation result: "+ videoList.get(0).getTitle();
+        }
     }
 }

@@ -5,7 +5,7 @@ import fileio.MovieInputData;
 
 import java.util.*;
 
-public class Movie extends Video implements Comparable<Movie> {
+public class Movie extends Video {
     /**
      * Duration in minutes of a movie
      */
@@ -88,15 +88,6 @@ public class Movie extends Video implements Comparable<Movie> {
 
     public int getDuration() {
         return duration;
-    }
-
-    @Override
-    public int compareTo(Movie that) {
-        if (Double.compare(this.getRating(), that.getRating()) == 0) {
-            return this.getTitle().compareTo(that.getTitle());
-        } else {
-            return Double.compare(this.getRating(), that.getRating());
-        }
     }
 
     @Override

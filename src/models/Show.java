@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-public class Show extends Video implements Comparable<Show> {
+public class Show extends Video  {
     /**
      * Number of seasons
      */
@@ -106,6 +106,10 @@ public class Show extends Video implements Comparable<Show> {
         for (Season season : this.getSeasons()) {
             sum += season.getRatingMean();
         }
+
+        if (sum == 0) {
+            return 0;
+        }
         sum /= this.numberOfSeasons;
         return sum;
     }
@@ -116,15 +120,6 @@ public class Show extends Video implements Comparable<Show> {
             duration += season.getDuration();
         }
         return duration;
-    }
-
-    @Override
-    public int compareTo(Show that) {
-        if (Double.compare(this.getRating(), that.getRating()) == 0) {
-            return this.getTitle().compareTo(that.getTitle());
-        } else {
-            return Double.compare(this.getRating(), that.getRating());
-        }
     }
 
     @Override

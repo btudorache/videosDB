@@ -2,7 +2,7 @@ package models;
 
 import java.util.ArrayList;
 
-public abstract class Video {
+public class Video implements Comparable<Video> {
     /**
      * Video's title
      */
@@ -60,5 +60,14 @@ public abstract class Video {
 
     public int getNumRatings(){
         return numRatings;
+    }
+
+    @Override
+    public int compareTo(Video that) {
+        if (Double.compare(this.getRating(), that.getRating()) == 0) {
+            return this.getTitle().compareTo(that.getTitle());
+        } else {
+            return Double.compare(this.getRating(), that.getRating());
+        }
     }
 }
