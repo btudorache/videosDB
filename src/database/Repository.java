@@ -2,10 +2,7 @@ package database;
 
 import common.Constants;
 import fileio.*;
-import models.Movie;
-import models.Show;
-import models.User;
-import models.Video;
+import models.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -18,6 +15,7 @@ public class Repository {
      * List of actors
      */
     private List<ActorInputData> actorsData;
+    private HashMap<String, Actor> actorDict;
     /**
      * List of commands
      */
@@ -35,24 +33,27 @@ public class Repository {
     private JSONArray arrayResult;
 
     public Repository(Input input, Writer fileWriter, JSONArray arrayResult) {
-        this.actorsData = input.getActors();
+        this.actorDict = new HashMap<>();
+        for (ActorInputData actorData : input.getActors()) {
+            this.actorDict.put(actorData.getName(), new Actor(actorData));
+        }
 
-        this.userDict = new HashMap<String, User>();
+        this.userDict = new HashMap<>();
         for (UserInputData userData : input.getUsers()) {
             this.userDict.put(userData.getUsername(), new User(userData));
         }
 
         this.commandsData = input.getCommands();
 
-        this.videoSet = new LinkedHashSet<String>();
+        this.videoSet = new LinkedHashSet<>();
 
-        this.movieDict = new HashMap<String, Video>();
+        this.movieDict = new HashMap<>();
         for (MovieInputData movieData : input.getMovies()) {
             this.videoSet.add(movieData.getTitle());
             this.movieDict.put(movieData.getTitle(), new Movie(movieData));
         }
 
-        this.showDict = new HashMap<String, Video>();
+        this.showDict = new HashMap<>();
         for (SerialInputData showData : input.getSerials()) {
             this.videoSet.add(showData.getTitle());
             this.showDict.put(showData.getTitle(), new Show(showData));
@@ -66,7 +67,7 @@ public class Repository {
         JSONObject data = this.fileWriter.writeFile(id, field, message);
         this.arrayResult.add(data);
     }
-    
+
     private void runCommands(ActionInputData action) throws IOException {
         if (action.getType().equals(Constants.FAVORITE)) {
             User user = this.userDict.get(action.getUsername());

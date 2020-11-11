@@ -1,16 +1,12 @@
-package fileio;
+package models;
 
 import actor.ActorsAwards;
+import fileio.ActorInputData;
 
 import java.util.ArrayList;
 import java.util.Map;
 
-/**
- * Information about an actor, retrieved from parsing the input test files
- * <p>
- * DO NOT MODIFY
- */
-public final class ActorInputData {
+public class Actor {
     /**
      * actor name
      */
@@ -28,21 +24,15 @@ public final class ActorInputData {
      */
     private Map<ActorsAwards, Integer> awards;
 
-    public ActorInputData(final String name, final String careerDescription,
-                          final ArrayList<String> filmography,
-                          final Map<ActorsAwards, Integer> awards) {
-        this.name = name;
-        this.careerDescription = careerDescription;
-        this.filmography = filmography;
-        this.awards = awards;
+    public Actor(ActorInputData actorData) {
+        this.name = actorData.getName();
+        this.careerDescription = actorData.getCareerDescription();
+        this.filmography = actorData.getFilmography();
+        this.awards = actorData.getAwards();
     }
 
     public String getName() {
         return name;
-    }
-
-    public void setName(final String name) {
-        this.name = name;
     }
 
     public String getCareerDescription() {
@@ -51,10 +41,6 @@ public final class ActorInputData {
 
     public ArrayList<String> getFilmography() {
         return filmography;
-    }
-
-    public void setFilmography(final ArrayList<String> filmography) {
-        this.filmography = filmography;
     }
 
     public Map<ActorsAwards, Integer> getAwards() {

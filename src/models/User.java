@@ -163,6 +163,5 @@ public class User {
             builder.append(']');
             return builder.toString();
         }
-
     }
 }
