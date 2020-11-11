@@ -62,21 +62,23 @@ public class Repository {
         this.arrayResult = arrayResult;
     }
 
+    private void writeMessage(int id, String field, String message) throws IOException {
+        JSONObject data = this.fileWriter.writeFile(id, field, message);
+        this.arrayResult.add(data);
+    }
+    
     private void runCommands(ActionInputData action) throws IOException {
         if (action.getType().equals(Constants.FAVORITE)) {
             User user = this.userDict.get(action.getUsername());
             if (user.getHistory().containsKey(action.getTitle())) {
                 if (user.getFavoriteMovies().contains(action.getTitle())) {
-                    JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "error -> " + action.getTitle() + " is already in favourite list");
-                    this.arrayResult.add(data);
+                    writeMessage(action.getActionId(), "", "error -> " + action.getTitle() + " is already in favourite list");
                 } else {
                     user.getFavoriteMovies().add(action.getTitle());
-                    JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "success -> " + action.getTitle() + " was added as favourite");
-                    this.arrayResult.add(data);
+                    writeMessage(action.getActionId(), "", "success -> " + action.getTitle() + " was added as favourite");
                 }
             } else {
-                JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "error -> " + action.getTitle() + " is not seen");
-                this.arrayResult.add(data);
+                writeMessage(action.getActionId(), "", "error -> " + action.getTitle() + " is not seen");
             }
 
         } else if (action.getType().equals(Constants.VIEW)) {
@@ -87,8 +89,7 @@ public class Repository {
             } else {
                 user.getHistory().put(action.getTitle(), 1);
             }
-            JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "success -> " + action.getTitle() + " was viewed with total views of " + user.getHistory().get(action.getTitle()));
-            this.arrayResult.add(data);
+            writeMessage(action.getActionId(), "", "success -> " + action.getTitle() + " was viewed with total views of " + user.getHistory().get(action.getTitle()));
 
         } else if (action.getType().equals(Constants.RATING)) {
             User user = this.userDict.get(action.getUsername());
@@ -96,17 +97,15 @@ public class Repository {
                 user.incrementNumRatings();
                 if (this.movieDict.containsKey(action.getTitle())) {
                     this.movieDict.get(action.getTitle()).addRating(action.getGrade(), 0);
-                    JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "success -> " + action.getTitle() + " was rated with " + action.getGrade() + " by " + action.getUsername());
-                    this.arrayResult.add(data);
+                    writeMessage(action.getActionId(), "", "success -> " + action.getTitle() + " was rated with " + action.getGrade() + " by " + action.getUsername());
 
                 } else if (this.showDict.containsKey(action.getTitle())) {
                     this.showDict.get(action.getTitle()).addRating(action.getGrade(), action.getSeasonNumber());
-                    JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "success -> " + action.getTitle() + " was rated with " + action.getGrade() + " by " + action.getUsername());
-                    this.arrayResult.add(data);
+                    writeMessage(action.getActionId(), "", "success -> " + action.getTitle() + " was rated with " + action.getGrade() + " by " + action.getUsername());
+
                 }
             } else {
-                JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "error -> " + action.getTitle() + " is not seen");
-                this.arrayResult.add(data);
+                writeMessage(action.getActionId(), "", "error -> " + action.getTitle() + " is not seen");
             }
         }
     }
@@ -131,23 +130,20 @@ public class Repository {
         ArrayList<Video> moviesFiltered = Video.findShows(this.movieDict, action.getFilters());
         if (action.getCriteria().equals(Constants.RATINGS)) {
             if (moviesFiltered.isEmpty()) {
-                JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "Query result: []");
-                this.arrayResult.add(data);
+                writeMessage(action.getActionId(), "", "Query result: []");
+
             } else {
                 Movie.sortRating(action.getSortType(), moviesFiltered);
                 String stringList = Movie.parseQuery(moviesFiltered, action.getNumber());
-                JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "Query result: " + stringList);
-                this.arrayResult.add(data);
+                writeMessage(action.getActionId(), "", "Query result: " + stringList);
             }
         } else if (action.getCriteria().equals(Constants.LONGEST)) {
             if (moviesFiltered.isEmpty()) {
-                JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "Query result: []");
-                this.arrayResult.add(data);
+                writeMessage(action.getActionId(), "", "Query result: []");
             } else {
                 Movie.sortLongest(action.getSortType(), moviesFiltered);
                 String stringList = Movie.parseQuery(moviesFiltered, action.getNumber());
-                JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "Query result: " + stringList);
-                this.arrayResult.add(data);
+                writeMessage(action.getActionId(), "", "Query result: " + stringList);
             }
         }
     }
@@ -156,23 +152,19 @@ public class Repository {
         ArrayList<Video> showsFiltered = Video.findShows(this.showDict, action.getFilters());
         if (action.getCriteria().equals(Constants.RATINGS)) {
             if (showsFiltered.isEmpty()) {
-                JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "Query result: []");
-                this.arrayResult.add(data);
+                writeMessage(action.getActionId(), "", "Query result: []");
             } else {
                 Show.sortRating(action.getSortType(), showsFiltered);
                 String stringList = Show.parseQuery(showsFiltered, action.getNumber());
-                JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "Query result: " + stringList);
-                this.arrayResult.add(data);
+                writeMessage(action.getActionId(), "", "Query result: " + stringList);
             }
         } else if (action.getCriteria().equals(Constants.LONGEST)) {
             if (showsFiltered.isEmpty()) {
-                JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "Query result: []");
-                this.arrayResult.add(data);
+                writeMessage(action.getActionId(), "", "Query result: []");
             } else {
                 Show.sortLongest(action.getSortType(), showsFiltered);
                 String stringList = Show.parseQuery(showsFiltered, action.getNumber());
-                JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "Query result: " + stringList);
-                this.arrayResult.add(data);
+                writeMessage(action.getActionId(), "", "Query result: " + stringList);
             }
         }
     }
@@ -180,8 +172,7 @@ public class Repository {
     private void runUserQueries(ActionInputData action) throws IOException {
         if (action.getCriteria().equals(Constants.NUM_RATINGS)) {
             String stringList = User.getUsersQuery(this.userDict, action.getSortType(), action.getNumber());
-            JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "Query result: " + stringList);
-            this.arrayResult.add(data);
+            writeMessage(action.getActionId(), "", "Query result: " + stringList);
         }
     }
 
@@ -189,12 +180,10 @@ public class Repository {
         User user = this.userDict.get(action.getUsername());
         if (action.getType().equals(Constants.STANDARD)) {
             String stringRecommendation = user.recommendStandard(this.videoSet, this.movieDict, this.showDict);
-            JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", stringRecommendation);
-            this.arrayResult.add(data);
+            writeMessage(action.getActionId(), "", stringRecommendation);
         } else if (action.getType().equals(Constants.BEST_UNSEEN)) {
             String stringRecommendation = user.recommendBestUnseen(this.videoSet, this.movieDict, this.showDict);
-            JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", stringRecommendation);
-            this.arrayResult.add(data);
+            writeMessage(action.getActionId(), "", stringRecommendation);
         } else if (action.getType().equals(Constants.POPULAR)) {
             if (!user.getSubscriptionType().equals(Constants.PREMIUM)) {
 
@@ -209,13 +198,10 @@ public class Repository {
             }
         } else if (action.getType().equals(Constants.SEARCH)) {
             if (!user.getSubscriptionType().equals(Constants.PREMIUM)) {
-                String stringRecommendation = user.recommendSearch(this.videoSet, this.movieDict, this.showDict, action.getGenre());
-                JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "SearchRecommendation cannot be applied");
-                this.arrayResult.add(data);
+                writeMessage(action.getActionId(), "", "SearchRecommendation cannot be applied");
             } else {
                 String stringRecommendation = user.recommendSearch(this.videoSet, this.movieDict, this.showDict, action.getGenre());
-                JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", stringRecommendation);
-                this.arrayResult.add(data);
+                writeMessage(action.getActionId(), "", stringRecommendation);
             }
         }
     }
