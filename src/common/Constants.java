@@ -37,7 +37,7 @@ public final class Constants {
     public static final String VIEW = "view";
     public static final String RATING = "rating";
     public static final String RATINGS = "ratings";
-    public static final String PREMIUM = "premium";
+    public static final String PREMIUM = "PREMIUM";
     public static final String POPULAR = "popular";
     public static final String ASCENDING = "asc";
     public static final String DESCENDING = "desc";

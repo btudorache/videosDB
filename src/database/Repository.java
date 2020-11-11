@@ -194,18 +194,28 @@ public class Repository {
             String stringRecommendation = user.recommendBestUnseen(this.videoSet, this.movieDict, this.showDict);
             JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", stringRecommendation);
             this.arrayResult.add(data);
-        } else if (this.userDict.containsKey(action.getUsername()) &&
-                   this.userDict.get(action.getUsername()).getSubscriptionType().equals(Constants.PREMIUM) &&
-                   action.getType().equals(Constants.POPULAR)) {
+        } else if (action.getType().equals(Constants.POPULAR)) {
+            if (!user.getSubscriptionType().equals(Constants.PREMIUM)) {
 
-        } else if (this.userDict.containsKey(action.getUsername()) &&
-                   this.userDict.get(action.getUsername()).getSubscriptionType().equals(Constants.PREMIUM) &&
-                   action.getType().equals(Constants.FAVORITE)) {
+            } else {
 
-        } else if (this.userDict.containsKey(action.getUsername()) &&
-                   this.userDict.get(action.getUsername()).getSubscriptionType().equals(Constants.PREMIUM) &&
-                   action.getType().equals(Constants.SEARCH)) {
+            }
+        } else if (action.getType().equals(Constants.FAVORITE)) {
+            if (!user.getSubscriptionType().equals(Constants.PREMIUM)) {
 
+            } else {
+
+            }
+        } else if (action.getType().equals(Constants.SEARCH)) {
+            if (!user.getSubscriptionType().equals(Constants.PREMIUM)) {
+                String stringRecommendation = user.recommendSearch(this.videoSet, this.movieDict, this.showDict, action.getGenre());
+                JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", "SearchRecommendation cannot be applied");
+                this.arrayResult.add(data);
+            } else {
+                String stringRecommendation = user.recommendSearch(this.videoSet, this.movieDict, this.showDict, action.getGenre());
+                JSONObject data = this.fileWriter.writeFile(action.getActionId(), "", stringRecommendation);
+                this.arrayResult.add(data);
+            }
         }
     }
 

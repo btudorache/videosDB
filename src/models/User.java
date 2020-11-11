@@ -99,6 +99,23 @@ public class User {
         return videoList;
     }
 
+    public ArrayList<Video> getUnseenVideosByGenre(LinkedHashSet<String> videoSet,
+                                            HashMap<String, Movie> movieDict,
+                                            HashMap<String, Show> showDict,
+                                            String genre) {
+        videoSet.removeAll(getHistory().keySet());
+        ArrayList<Video> videoList = new ArrayList<Video>();
+        for (String title : videoSet) {
+            if (movieDict.containsKey(title) && movieDict.get(title).getGenres().contains(genre)) {
+                videoList.add(movieDict.get(title));
+            } else if (showDict.containsKey(title) && showDict.get(title).getGenres().contains(genre)) {
+                videoList.add(showDict.get(title));
+            }
+        }
+
+        return videoList;
+    }
+
     public String recommendStandard(LinkedHashSet<String> videoSet, HashMap<String, Movie> movieDict, HashMap<String, Show> showDict) {
         ArrayList<Video> videoList = getUnseenVideos(videoSet, movieDict, showDict);
         if (videoList.isEmpty()) {
@@ -125,5 +142,27 @@ public class User {
             }));
             return "BestRatedUnseenRecommendation result: "+ videoList.get(0).getTitle();
         }
+    }
+
+    public String recommendSearch(LinkedHashSet<String> videoSet,
+                                  HashMap<String, Movie> movieDict,
+                                  HashMap<String, Show> showDict,
+                                  String genre) {
+        ArrayList<Video> videoList = getUnseenVideosByGenre(videoSet, movieDict, showDict, genre);
+        if (videoList.isEmpty()) {
+            return "SearchRecommendation cannot be applied!";
+        } else {
+            Collections.sort(videoList);
+            StringBuilder builder = new StringBuilder();
+            builder.append("SearchRecommendation result: [");
+            for (int i = 0; i < videoList.size() - 1; i++) {
+                builder.append(videoList.get(i).getTitle());
+                builder.append(", ");
+            }
+            builder.append(videoList.get(videoList.size() - 1).getTitle());
+            builder.append(']');
+            return builder.toString();
+        }
+
     }
 }
