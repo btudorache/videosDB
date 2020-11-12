@@ -133,7 +133,13 @@ public class Repository {
 
     private void runActorQueries(ActionInputData action) throws IOException {
         if (action.getCriteria().equals(Constants.AVERAGE)) {
-            String queryString = Actor.actorsQueryAverage(actorDict, movieDict, showDict, action);
+            String queryString = Actor.queryAverage(actorDict, movieDict, showDict, action);
+            writeMessage(action.getActionId(), "", queryString);
+        } else if (action.getCriteria().equals(Constants.AWARDS)) {
+            String queryString = Actor.queryAwards(actorDict, action);
+            writeMessage(action.getActionId(), "", queryString);
+        } else if (action.getCriteria().equals(Constants.FILTER_DESCRIPTIONS)) {
+            String queryString = Actor.queryFilterDescriptions(actorDict, action);
             writeMessage(action.getActionId(), "", queryString);
         }
     }
