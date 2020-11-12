@@ -1,11 +1,10 @@
 package models;
 
 import common.Constants;
+import fileio.ActionInputData;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.lang.reflect.Array;
+import java.util.*;
 
 public abstract class Video implements Comparable<Video> {
     /**
@@ -29,6 +28,8 @@ public abstract class Video implements Comparable<Video> {
      */
     protected double rating;
     protected int numRatings;
+    protected int numFavorites;
+    protected int numViews;
 
     public Video(final String title, final int year, final ArrayList<String> cast, final ArrayList<String> genres) {
         this.title = title;
@@ -37,6 +38,16 @@ public abstract class Video implements Comparable<Video> {
         this.genres = genres;
         this.rating = 0;
         this.numRatings = 0;
+        this.numFavorites = 0;
+        this.numViews = 0;
+    }
+
+    public void incrementNumFavorites() {
+        this.numFavorites++;
+    }
+
+    public void addNumViews(int views) {
+        this.numViews += views;
     }
 
     public abstract void addRating(double rate, int season);
@@ -63,6 +74,14 @@ public abstract class Video implements Comparable<Video> {
 
     public int getNumRatings(){
         return numRatings;
+    }
+
+    public int getNumFavorites() {
+        return numFavorites;
+    }
+
+    public int getNumViews() {
+        return numViews;
     }
 
     public static ArrayList<Video> findShows(HashMap<String, Video> videos, List<List<String>> filters) {
@@ -124,6 +143,40 @@ public abstract class Video implements Comparable<Video> {
         } else if (order.equals(Constants.DESCENDING)) {
             videoList.sort((show1, show2) -> show2.getDuration() - show1.getDuration());
         }
+    }
+
+    public static String queryFavorite(ArrayList<Video> filteredVideos, ActionInputData action) {
+        filteredVideos.removeIf(video -> video.getNumFavorites() == 0);
+
+        if (filteredVideos.isEmpty()) {
+            return "Query result: []";
+        }
+
+        filteredVideos.sort(Collections.reverseOrder(new Comparator<Video>() {
+            @Override
+            public int compare(Video video1, Video video2) {
+                return video1.getNumFavorites() - video2.getNumFavorites();
+            }
+        }));
+
+        return "Query result: " + parseQuery(filteredVideos, action.getNumber());
+    }
+
+    public static String queryMostViewed(ArrayList<Video> filteredVideos, ActionInputData action) {
+        filteredVideos.removeIf(video -> video.getNumViews() == 0);
+
+        if (filteredVideos.isEmpty()) {
+            return "Query result: []";
+        }
+
+        filteredVideos.sort(Collections.reverseOrder(new Comparator<Video>() {
+            @Override
+            public int compare(Video video1, Video video2) {
+                return video1.getNumViews() - video2.getNumViews();
+            }
+        }));
+
+        return "Query result: " + parseQuery(filteredVideos, action.getNumber());
     }
 
     abstract int getDuration();

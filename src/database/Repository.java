@@ -38,11 +38,6 @@ public class Repository {
             this.actorDict.put(actorData.getName(), new Actor(actorData));
         }
 
-        this.userDict = new HashMap<>();
-        for (UserInputData userData : input.getUsers()) {
-            this.userDict.put(userData.getUsername(), new User(userData));
-        }
-
         this.commandsData = input.getCommands();
 
         this.videoSet = new LinkedHashSet<>();
@@ -57,6 +52,26 @@ public class Repository {
         for (SerialInputData showData : input.getSerials()) {
             this.videoSet.add(showData.getTitle());
             this.showDict.put(showData.getTitle(), new Show(showData));
+        }
+
+        this.userDict = new HashMap<>();
+        for (UserInputData userData : input.getUsers()) {
+            this.userDict.put(userData.getUsername(), new User(userData));
+            for (String favoriteVideo : userData.getFavoriteMovies()) {
+                if (this.movieDict.containsKey(favoriteVideo)) {
+                    this.movieDict.get(favoriteVideo).incrementNumFavorites();
+                } else if (this.showDict.containsKey(favoriteVideo)) {
+                    this.showDict.get(favoriteVideo).incrementNumFavorites();
+                }
+            }
+
+            for (String videoTitle : userData.getHistory().keySet()) {
+                if (this.movieDict.containsKey(videoTitle)) {
+                    this.movieDict.get(videoTitle).addNumViews(userData.getHistory().get(videoTitle));
+                } else if (this.showDict.containsKey(videoTitle)) {
+                    this.showDict.get(videoTitle).addNumViews(userData.getHistory().get(videoTitle));
+                }
+            }
         }
 
         this.fileWriter = fileWriter;
@@ -84,6 +99,13 @@ public class Repository {
 
         } else if (action.getType().equals(Constants.VIEW)) {
             User user = this.userDict.get(action.getUsername());
+
+            if (this.movieDict.containsKey(action.getTitle())) {
+                this.movieDict.get(action.getTitle()).addNumViews(1);
+            } else if (this.showDict.containsKey(action.getTitle())) {
+                this.showDict.get(action.getTitle()).addNumViews(1);
+            }
+
             if (user.getHistory().containsKey(action.getTitle())) {
                 int numViews = user.getHistory().get(action.getTitle());
                 user.getHistory().put(action.getTitle(), numViews + 1);
@@ -101,6 +123,7 @@ public class Repository {
                         writeMessage(action.getActionId(), "", "error -> " + action.getTitle() + " has been already rated" );
                     } else {
                         this.movieDict.get(action.getTitle()).addRating(action.getGrade(), 0);
+                        this.movieDict.get(action.getTitle()).incrementNumFavorites();
                         user.addToRated(action.getTitle());
                         writeMessage(action.getActionId(), "", "success -> " + action.getTitle() + " was rated with " + action.getGrade() + " by " + action.getUsername());
                     }
@@ -109,6 +132,7 @@ public class Repository {
                         writeMessage(action.getActionId(), "", "error -> " + action.getTitle() + " has been already rated" );
                     } else {
                         this.showDict.get(action.getTitle()).addRating(action.getGrade(), action.getSeasonNumber());
+                        this.showDict.get(action.getTitle()).incrementNumFavorites();
                         user.addToRated(action.getTitle());
                         writeMessage(action.getActionId(), "", "success -> " + action.getTitle() + " was rated with " + action.getGrade() + " by " + action.getUsername());
                     }
@@ -163,6 +187,12 @@ public class Repository {
                 String stringList = Movie.parseQuery(moviesFiltered, action.getNumber());
                 writeMessage(action.getActionId(), "", "Query result: " + stringList);
             }
+        } else if (action.getCriteria().equals(Constants.FAVORITE)) {
+            String stringList = Video.queryFavorite(moviesFiltered, action);
+            writeMessage(action.getActionId(), "", stringList);
+        } else if (action.getCriteria().equals(Constants.MOST_VIEWED)) {
+            String stringList = Video.queryMostViewed(moviesFiltered, action);
+            writeMessage(action.getActionId(), "", stringList);
         }
     }
 
@@ -184,6 +214,12 @@ public class Repository {
                 String stringList = Show.parseQuery(showsFiltered, action.getNumber());
                 writeMessage(action.getActionId(), "", "Query result: " + stringList);
             }
+        } else if (action.getCriteria().equals(Constants.FAVORITE)) {
+            String stringList = Video.queryFavorite(showsFiltered, action);
+            writeMessage(action.getActionId(), "", stringList);
+        } else if (action.getCriteria().equals(Constants.MOST_VIEWED)) {
+            String stringList = Video.queryMostViewed(showsFiltered, action);
+            writeMessage(action.getActionId(), "", stringList);
         }
     }
 
