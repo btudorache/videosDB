@@ -129,11 +129,11 @@ public abstract class Video implements Comparable<Video> {
         return queryBuilder.toString();
     }
 
-    public static void sortRating(String order, ArrayList<Video> videoList) {
+    public static void sortByOrder(String order, ArrayList<Video> videoList, Comparator<Video> comparator) {
         if (order.equals(Constants.ASCENDING)) {
-            Collections.sort(videoList);
+            videoList.sort(comparator);
         } else if (order.equals(Constants.DESCENDING)) {
-            Collections.sort(videoList, Collections.reverseOrder());
+            videoList.sort(Collections.reverseOrder(comparator));
         }
     }
 
@@ -145,6 +145,44 @@ public abstract class Video implements Comparable<Video> {
         }
     }
 
+    public static String queryLongest(ArrayList<Video> filteredVideos, ActionInputData action) {
+        filteredVideos.removeIf(video -> video.getDuration() == 0);
+
+        if (filteredVideos.isEmpty()) {
+            return "Query result: []";
+        }
+
+        Comparator<Video> lengthComparator = new Comparator<Video>() {
+            @Override
+            public int compare(Video video1, Video video2) {
+                if (video1.getDuration() - video2.getDuration() == 0) {
+                    return video1.getTitle().compareTo(video2.getTitle());
+                } else {
+                    return video1.getDuration() - video2.getDuration();
+                }
+            }
+        };
+        sortByOrder(action.getSortType(), filteredVideos, lengthComparator);
+
+        return "Query result: " + parseQuery(filteredVideos, action.getNumber());
+    }
+
+    public static String queryRating(ArrayList<Video> filteredVideos, ActionInputData action) {
+        filteredVideos.removeIf(video -> video.getRating() == 0);
+
+        if (filteredVideos.isEmpty()) {
+            return "Query result: []";
+        }
+
+        if (action.getSortType().equals(Constants.ASCENDING)) {
+            Collections.sort(filteredVideos);
+        } else if (action.getSortType().equals(Constants.DESCENDING)) {
+            Collections.sort(filteredVideos, Collections.reverseOrder());
+        }
+
+        return "Query result: " + parseQuery(filteredVideos, action.getNumber());
+    }
+
     public static String queryFavorite(ArrayList<Video> filteredVideos, ActionInputData action) {
         filteredVideos.removeIf(video -> video.getNumFavorites() == 0);
 
@@ -152,12 +190,17 @@ public abstract class Video implements Comparable<Video> {
             return "Query result: []";
         }
 
-        filteredVideos.sort(Collections.reverseOrder(new Comparator<Video>() {
+        Comparator<Video> favoriteComparator = new Comparator<Video>() {
             @Override
             public int compare(Video video1, Video video2) {
-                return video1.getNumFavorites() - video2.getNumFavorites();
+                if (video1.getNumFavorites() - video2.getNumFavorites() == 0) {
+                    return video1.getTitle().compareTo(video2.getTitle());
+                } else {
+                    return video1.getNumFavorites() - video2.getNumFavorites();
+                }
             }
-        }));
+        };
+        sortByOrder(action.getSortType(), filteredVideos, favoriteComparator);
 
         return "Query result: " + parseQuery(filteredVideos, action.getNumber());
     }
@@ -169,12 +212,17 @@ public abstract class Video implements Comparable<Video> {
             return "Query result: []";
         }
 
-        filteredVideos.sort(Collections.reverseOrder(new Comparator<Video>() {
+        Comparator<Video> viewsComparator = new Comparator<Video>() {
             @Override
             public int compare(Video video1, Video video2) {
-                return video1.getNumViews() - video2.getNumViews();
+                if (video1.getNumViews() - video2.getNumViews() == 0) {
+                    return video1.getTitle().compareTo(video2.getTitle());
+                } else {
+                    return video1.getNumViews() - video2.getNumViews();
+                }
             }
-        }));
+        };
+        sortByOrder(action.getSortType(), filteredVideos, viewsComparator);
 
         return "Query result: " + parseQuery(filteredVideos, action.getNumber());
     }

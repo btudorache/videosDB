@@ -23,7 +23,8 @@ public class User {
      */
     private ArrayList<String> favoriteMovies;
 
-    private ArrayList<String> ratedVideos;
+    private ArrayList<String> ratedMovies;
+    private HashMap<String, HashMap<Integer, Boolean>> ratedShows;
     private int numRatings;
 
     public User(UserInputData userData) {
@@ -33,7 +34,9 @@ public class User {
         this.history = userData.getHistory();
         this.numRatings = 0;
 
-        this.ratedVideos = new ArrayList<>();
+        this.ratedMovies = new ArrayList<>();
+        this.ratedShows = new HashMap<>();
+
     }
 
     public void incrementNumRatings() {
@@ -148,12 +151,42 @@ public class User {
         }
     }
 
+    public String recommendFavorite(HashMap<String, Video> movieDict, HashMap<String, Video> showDict) {
+        ArrayList<Video> videoList = new ArrayList<>();
+        for (Video video : movieDict.values()) {
+            if (video.getNumFavorites() != 0 && !this.getFavoriteMovies().contains(video.getTitle())) {
+                videoList.add(video);
+            }
+        }
+        for (Video video : showDict.values()) {
+            if (video.getNumFavorites() != 0 && !this.getFavoriteMovies().contains(video.getTitle())) {
+                videoList.add(video);
+            }
+        }
+
+        if (videoList.isEmpty()) {
+            return "FavoriteRecommendation cannot be applied!";
+        } else {
+            videoList.sort(Collections.reverseOrder(new Comparator<Video>() {
+                @Override
+                public int compare(Video video1, Video video2) {
+                    if (video1.getNumFavorites() - video2.getNumFavorites() == 0) {
+                        return video2.getTitle().compareTo(video1.getTitle());
+                    } else {
+                        return video1.getNumFavorites() - video2.getNumFavorites();
+                    }
+                }
+            }));
+        }
+        return "FavoriteRecommendation result: " + videoList.get(0).getTitle();
+    }
+
     public String recommendSearch(LinkedHashSet<String> videoSet,
                                   HashMap<String, Video> movieDict,
                                   HashMap<String, Video> showDict,
                                   String genre) {
         ArrayList<Video> videoList = getUnseenVideosByGenre(videoSet, movieDict, showDict, genre);
-        if (videoList.isEmpty()) {
+        if (videoList.isEmpty() || !this.getSubscriptionType().equals(Constants.PREMIUM)) {
             return "SearchRecommendation cannot be applied!";
         } else {
             Collections.sort(videoList);
@@ -169,11 +202,19 @@ public class User {
         }
     }
 
-    public ArrayList<String> getRatedVideos() {
-        return ratedVideos;
+    public ArrayList<String> getRatedMovies() {
+        return ratedMovies;
     }
 
-    public void addToRated(String title) {
-        this.ratedVideos.add(title);
+    public HashMap<String, HashMap<Integer, Boolean>> getRatedShows() {
+        return ratedShows;
+    }
+
+    public void addToRatedMovies(String title) {
+        this.getRatedMovies().add(title);
+    }
+
+    public void addToRatedShows(String title, int season) {
+
     }
 }
