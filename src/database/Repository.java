@@ -11,10 +11,6 @@ import java.util.*;
 
 
 public class Repository {
-    /**
-     * List of actors
-     */
-    private List<ActorInputData> actorsData;
     private HashMap<String, Actor> actorDict;
     /**
      * List of commands
@@ -86,17 +82,8 @@ public class Repository {
     private void runCommands(ActionInputData action) throws IOException {
         User user = this.userDict.get(action.getUsername());
         if (action.getType().equals(Constants.FAVORITE)) {
-            if (user.getHistory().containsKey(action.getTitle())) {
-                if (user.getFavoriteMovies().contains(action.getTitle())) {
-                    writeMessage(action.getActionId(), "", "error -> " + action.getTitle() + " is already in favourite list");
-                } else {
-                    user.getFavoriteMovies().add(action.getTitle());
-                    writeMessage(action.getActionId(), "", "success -> " + action.getTitle() + " was added as favourite");
-                }
-            } else {
-                writeMessage(action.getActionId(), "", "error -> " + action.getTitle() + " is not seen");
-            }
-
+            String commandString = user.commandFavorite(action);
+            writeMessage(action.getActionId(), "", commandString);
         } else if (action.getType().equals(Constants.VIEW)) {
             if (this.movieDict.containsKey(action.getTitle())) {
                 this.movieDict.get(action.getTitle()).addNumViews(1);

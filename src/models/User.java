@@ -1,6 +1,7 @@
 package models;
 
 import common.Constants;
+import fileio.ActionInputData;
 import fileio.UserInputData;
 
 import java.util.*;
@@ -36,7 +37,6 @@ public class User {
 
         this.ratedMovies = new ArrayList<>();
         this.ratedShows = new HashMap<>();
-
     }
 
     public void incrementNumRatings() {
@@ -61,6 +61,19 @@ public class User {
 
     public int getNumRatings() {
         return numRatings;
+    }
+
+    public String commandFavorite(ActionInputData action) {
+        if (this.getHistory().containsKey(action.getTitle())) {
+            if (this.getFavoriteMovies().contains(action.getTitle())) {
+                return "error -> " + action.getTitle() + " is already in favourite list";
+            } else {
+                this.getFavoriteMovies().add(action.getTitle());
+                return "success -> " + action.getTitle() + " was added as favourite";
+            }
+        } else {
+            return "error -> " + action.getTitle() + " is not seen";
+        }
     }
 
     public static String getUsersQuery(HashMap<String, User> userDict, String order, int numUsers) {
@@ -134,20 +147,18 @@ public class User {
 
     public String recommendBestUnseen(LinkedHashSet<String> videoSet, HashMap<String, Video> movieDict, HashMap<String, Video> showDict) {
         ArrayList<Video> videoList = getUnseenVideos(videoSet, movieDict, showDict);
+
         if (videoList.isEmpty()) {
             return "BestRatedUnseenRecommendation cannot be applied!";
         } else {
-            Collections.sort(videoList, Collections.reverseOrder(new Comparator<Video>() {
-                @Override
-                public int compare(Video video1, Video video2) {
-                    if (Double.compare(video1.getRating(), video2.getRating()) == 0) {
-                        return video2.getTitle().compareTo(video1.getTitle());
-                    } else {
-                        return Double.compare(video1.getRating(), video2.getRating());
-                    }
+            Video searchedVideo = videoList.get(0);
+            for (Video video : videoList) {
+                if (video.getRating() > searchedVideo.getRating()) {
+                    searchedVideo = video;
                 }
-            }));
-            return "BestRatedUnseenRecommendation result: "+ videoList.get(0).getTitle();
+            }
+
+            return "BestRatedUnseenRecommendation result: "+ searchedVideo.getTitle();
         }
     }
 
@@ -167,16 +178,13 @@ public class User {
         if (videoList.isEmpty()) {
             return "FavoriteRecommendation cannot be applied!";
         } else {
-            videoList.sort(Collections.reverseOrder(new Comparator<Video>() {
-                @Override
-                public int compare(Video video1, Video video2) {
-                    if (video1.getNumFavorites() - video2.getNumFavorites() == 0) {
-                        return video2.getTitle().compareTo(video1.getTitle());
-                    } else {
-                        return video1.getNumFavorites() - video2.getNumFavorites();
-                    }
+            Video searchedVideo = videoList.get(0);
+            for (Video video : videoList) {
+                if (video.getNumFavorites() > searchedVideo.getNumFavorites()) {
+                    searchedVideo = video;
                 }
-            }));
+            }
+
         }
         return "FavoriteRecommendation result: " + videoList.get(0).getTitle();
     }
