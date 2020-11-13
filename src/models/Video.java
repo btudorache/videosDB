@@ -28,10 +28,12 @@ public abstract class Video implements Comparable<Video> {
     protected double rating;
     protected int numRatings;
     protected int numFavorites;
-    protected int numPremiumFavorites;
     protected int numViews;
 
-    public Video(final String title, final int year, final ArrayList<String> cast, final ArrayList<String> genres) {
+    public Video(final String title,
+                 final int year,
+                 final ArrayList<String> cast,
+                 final ArrayList<String> genres) {
         this.title = title;
         this.year = year;
         this.cast = cast;
@@ -39,37 +41,44 @@ public abstract class Video implements Comparable<Video> {
         this.rating = 0;
         this.numRatings = 0;
         this.numFavorites = 0;
-        this.numPremiumFavorites = 0;
         this.numViews = 0;
     }
 
+    /**
+     *
+     */
     public void incrementNumFavorites() {
         this.numFavorites++;
     }
 
-    public void incrementNumPremiumFavorites() {
-        this.numPremiumFavorites++;
-    }
-
-    public void addNumViews(int views) {
+    /**
+     *
+     * @param views
+     */
+    public void addNumViews(final int views) {
         this.numViews += views;
     }
 
+    /**
+     *
+     * @param rate
+     * @param season
+     */
     public abstract void addRating(double rate, int season);
 
-    public String getTitle() {
+    public final String getTitle() {
         return title;
     }
 
-    public int getYear() {
+    public final int getYear() {
         return year;
     }
 
-    public ArrayList<String> getCast() {
+    public final ArrayList<String> getCast() {
         return cast;
     }
 
-    public ArrayList<String> getGenres() {
+    public final ArrayList<String> getGenres() {
         return genres;
     }
 
@@ -77,31 +86,34 @@ public abstract class Video implements Comparable<Video> {
         return rating;
     }
 
-    public int getNumRatings(){
+    public final int getNumRatings() {
         return numRatings;
     }
 
-    public int getNumFavorites() {
+    public final int getNumFavorites() {
         return numFavorites;
     }
 
-    public int getNumViews() {
+    public final int getNumViews() {
         return numViews;
     }
 
-    public int getNumPremiumFavorites() {
-        return numPremiumFavorites;
-    }
-
-    public static ArrayList<Video> findShows(HashMap<String, Video> videos, List<List<String>> filters) {
+    /**
+     *
+     * @param videos
+     * @param filters
+     * @return
+     */
+    public static ArrayList<Video> findShows(final HashMap<String, Video> videos,
+                                             final List<List<String>> filters) {
         ArrayList<Video> videoList = new ArrayList<>();
         // if both filter present
-        if (filters.get(0) != null && filters.get(0).get(0) != null &&
-            filters.get(1) != null && filters.get(1).get(0) != null) {
+        if (filters.get(0) != null && filters.get(0).get(0) != null
+            && filters.get(1) != null && filters.get(1).get(0) != null) {
             for (Video video : videos.values()) {
-                if (filters.get(0).get(0) != null &&
-                        video.getYear() == Integer.parseInt(filters.get(0).get(0)) &&
-                        video.getGenres().containsAll(filters.get(1))) {
+                if (filters.get(0).get(0) != null
+                    && video.getYear() == Integer.parseInt(filters.get(0).get(0))
+                    && video.getGenres().containsAll(filters.get(1))) {
                     videoList.add(video);
                 }
             }
@@ -126,7 +138,8 @@ public abstract class Video implements Comparable<Video> {
         return videoList;
     }
 
-    public static String parseQuery(ArrayList<Video> videoList, int numShows) {
+    private static String parseQuery(final ArrayList<Video> videoList,
+                                     final int numShows) {
         StringBuilder queryBuilder = new StringBuilder();
         queryBuilder.append('[');
         int showsNumber = Math.min(numShows, videoList.size());
@@ -139,7 +152,15 @@ public abstract class Video implements Comparable<Video> {
         return queryBuilder.toString();
     }
 
-    public static void sortByOrder(String order, ArrayList<Video> videoList, Comparator<Video> comparator) {
+    /**
+     *
+     * @param order
+     * @param videoList
+     * @param comparator
+     */
+    public static void sortByOrder(final String order,
+                                   final ArrayList<Video> videoList,
+                                   final Comparator<Video> comparator) {
         if (order.equals(Constants.ASCENDING)) {
             videoList.sort(comparator);
         } else if (order.equals(Constants.DESCENDING)) {
@@ -147,15 +168,14 @@ public abstract class Video implements Comparable<Video> {
         }
     }
 
-    public static void sortLongest(String order, ArrayList<Video> videoList) {
-        if (order.equals(Constants.ASCENDING)) {
-            videoList.sort((show1, show2) -> show1.getDuration() - show2.getDuration());
-        } else if (order.equals(Constants.DESCENDING)) {
-            videoList.sort((show1, show2) -> show2.getDuration() - show1.getDuration());
-        }
-    }
-
-    public static String queryLongest(ArrayList<Video> filteredVideos, ActionInputData action) {
+    /**
+     *
+     * @param filteredVideos
+     * @param action
+     * @return
+     */
+    public static String queryLongest(final ArrayList<Video> filteredVideos,
+                                      final ActionInputData action) {
         filteredVideos.removeIf(video -> video.getDuration() == 0);
 
         if (filteredVideos.isEmpty()) {
@@ -164,7 +184,7 @@ public abstract class Video implements Comparable<Video> {
 
         Comparator<Video> lengthComparator = new Comparator<Video>() {
             @Override
-            public int compare(Video video1, Video video2) {
+            public int compare(final Video video1, final Video video2) {
                 if (video1.getDuration() - video2.getDuration() == 0) {
                     return video1.getTitle().compareTo(video2.getTitle());
                 } else {
@@ -177,7 +197,14 @@ public abstract class Video implements Comparable<Video> {
         return "Query result: " + parseQuery(filteredVideos, action.getNumber());
     }
 
-    public static String queryRating(ArrayList<Video> filteredVideos, ActionInputData action) {
+    /**
+     *
+     * @param filteredVideos
+     * @param action
+     * @return
+     */
+    public static String queryRating(final ArrayList<Video> filteredVideos,
+                                     final ActionInputData action) {
         filteredVideos.removeIf(video -> video.getRating() == 0);
 
         if (filteredVideos.isEmpty()) {
@@ -193,7 +220,14 @@ public abstract class Video implements Comparable<Video> {
         return "Query result: " + parseQuery(filteredVideos, action.getNumber());
     }
 
-    public static String queryFavorite(ArrayList<Video> filteredVideos, ActionInputData action) {
+    /**
+     *
+     * @param filteredVideos
+     * @param action
+     * @return
+     */
+    public static String queryFavorite(final ArrayList<Video> filteredVideos,
+                                       final ActionInputData action) {
         filteredVideos.removeIf(video -> video.getNumFavorites() == 0);
 
         if (filteredVideos.isEmpty()) {
@@ -202,7 +236,7 @@ public abstract class Video implements Comparable<Video> {
 
         Comparator<Video> favoriteComparator = new Comparator<Video>() {
             @Override
-            public int compare(Video video1, Video video2) {
+            public int compare(final Video video1, final Video video2) {
                 if (video1.getNumFavorites() - video2.getNumFavorites() == 0) {
                     return video1.getTitle().compareTo(video2.getTitle());
                 } else {
@@ -215,7 +249,14 @@ public abstract class Video implements Comparable<Video> {
         return "Query result: " + parseQuery(filteredVideos, action.getNumber());
     }
 
-    public static String queryMostViewed(ArrayList<Video> filteredVideos, ActionInputData action) {
+    /**
+     *
+     * @param filteredVideos
+     * @param action
+     * @return
+     */
+    public static String queryMostViewed(final ArrayList<Video> filteredVideos,
+                                         final ActionInputData action) {
         filteredVideos.removeIf(video -> video.getNumViews() == 0);
 
         if (filteredVideos.isEmpty()) {
@@ -224,7 +265,7 @@ public abstract class Video implements Comparable<Video> {
 
         Comparator<Video> viewsComparator = new Comparator<Video>() {
             @Override
-            public int compare(Video video1, Video video2) {
+            public int compare(final Video video1, final Video video2) {
                 if (video1.getNumViews() - video2.getNumViews() == 0) {
                     return video1.getTitle().compareTo(video2.getTitle());
                 } else {
@@ -240,7 +281,7 @@ public abstract class Video implements Comparable<Video> {
     abstract int getDuration();
 
     @Override
-    public int compareTo(Video that) {
+    public int compareTo(final Video that) {
         if (Double.compare(this.getRating(), that.getRating()) == 0) {
             return this.getTitle().compareTo(that.getTitle());
         } else {

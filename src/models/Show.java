@@ -1,12 +1,13 @@
 package models;
 
 import entertainment.Season;
+import entertainment.ShowSeason;
 import fileio.SerialInputData;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Show extends Video  {
+public final class Show extends Video  {
     /**
      * Number of seasons
      */
@@ -14,34 +15,40 @@ public class Show extends Video  {
     /**
      * Season list
      */
-    private final ArrayList<Season> seasons;
+    private final ArrayList<ShowSeason> seasons;
 
 
-    public Show(SerialInputData showData) {
+    public Show(final SerialInputData showData) {
         super(showData.getTitle(), showData.getYear(), showData.getCast(), showData.getGenres());
         this.numberOfSeasons = showData.getNumberSeason();
-        this.seasons = showData.getSeasons();
+        this.seasons = new ArrayList<>();
+        for (Season season : showData.getSeasons()) {
+            this.seasons.add(new ShowSeason(season));
+        }
     }
 
     public int getNumberSeason() {
         return numberOfSeasons;
     }
 
-    public ArrayList<Season> getSeasons() {
+    public ArrayList<ShowSeason> getSeasons() {
         return seasons;
     }
 
-    public void addRating(double rate, int seasonNum) {
-        Season season = this.getSeasons().get(seasonNum - 1);
-        season.addRating(rate);
+    /**
+     *
+     * @param rate
+     * @param seasonNum
+     */
+    public void addRating(final double rate, final int seasonNum) {
+        this.getSeasons().get(seasonNum - 1).addRating(rate);
     }
-
 
     @Override
     public double getRating() {
         double sum = 0;
         int numRatings = 0;
-        for (Season season : this.getSeasons()) {
+        for (ShowSeason season : this.getSeasons()) {
             List<Double> doubleArrayList = season.getRatings();
             double seasonMean = 0;
             for (Double rating : doubleArrayList) {
@@ -50,7 +57,7 @@ public class Show extends Video  {
             if (seasonMean != 0) {
                 seasonMean /= doubleArrayList.size();
             }
-            sum +=seasonMean;
+            sum += seasonMean;
         }
 
         if (sum == 0) {
@@ -62,7 +69,7 @@ public class Show extends Video  {
     @Override
     public int getDuration() {
         int duration = 0;
-        for (Season season : this.getSeasons()) {
+        for (ShowSeason season : this.getSeasons()) {
             duration += season.getDuration();
         }
         return duration;

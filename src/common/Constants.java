@@ -8,6 +8,7 @@ package common;
 public final class Constants {
     private Constants() {
     }
+    public static final int FILTER_WORDS = 3;
 
     public static final String DATABASE = "database";
     public static final String ACTORS = "actors";

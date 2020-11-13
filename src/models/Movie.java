@@ -2,24 +2,29 @@ package models;
 
 import fileio.MovieInputData;
 
-public class Movie extends Video {
-    /**
-     * Duration in minutes of a movie
-     */
+public final class Movie extends Video {
     private final int duration;
 
     private int numRatings;
 
-
-    public Movie(MovieInputData movieData) {
-        super(movieData.getTitle(), movieData.getYear(), movieData.getCast(), movieData.getGenres());
+    public Movie(final MovieInputData movieData) {
+        super(movieData.getTitle(),
+              movieData.getYear(),
+              movieData.getCast(),
+              movieData.getGenres());
         this.duration = movieData.getDuration();
         this.numRatings = 0;
     }
 
-    public void addRating(double rate, int seasonNum) {
+    /**
+     *
+     * @param rate
+     * @param seasonNum
+     */
+    public void addRating(final double rate, final int seasonNum) {
         this.numRatings++;
-        this.rating = this.rating * (this.numRatings - 1) / this.numRatings + rate / this.numRatings;
+        this.rating = this.rating
+                * (this.numRatings - 1) / this.numRatings + rate / this.numRatings;
     }
     @Override
     public int getDuration() {

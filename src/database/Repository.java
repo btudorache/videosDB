@@ -10,27 +10,25 @@ import java.io.IOException;
 import java.util.*;
 
 
-public class Repository {
-    private HashMap<String, Actor> actorDict;
-    /**
-     * List of commands
-     */
-    private List<ActionInputData> commandsData;
+public final class Repository {
+    private final HashMap<String, Actor> actorDict;
 
-    private HashMap<String, User> userDict;
+    private final List<ActionInputData> commandsData;
 
-    private LinkedHashSet<String> videoSet;
+    private final HashMap<String, User> userDict;
 
-    private HashMap<String, Video> movieDict;
+    private final LinkedHashSet<String> videoSet;
 
-    private HashMap<String, Video> showDict;
+    private final HashMap<String, Video> movieDict;
 
-    private HashMap<String, Video> videoDict;
+    private final HashMap<String, Video> showDict;
 
-    private Writer fileWriter;
-    private JSONArray arrayResult;
+    private final HashMap<String, Video> videoDict;
 
-    public Repository(Input input, Writer fileWriter, JSONArray arrayResult) {
+    private final Writer fileWriter;
+    private final JSONArray arrayResult;
+
+    public Repository(final Input input, final Writer fileWriter, final JSONArray arrayResult) {
         this.actorDict = new HashMap<>();
         for (ActorInputData actorData : input.getActors()) {
             this.actorDict.put(actorData.getName(), new Actor(actorData));
@@ -62,24 +60,18 @@ public class Repository {
         for (UserInputData userData : input.getUsers()) {
             this.userDict.put(userData.getUsername(), new User(userData));
             for (String favoriteVideo : userData.getFavoriteMovies()) {
-                if (this.movieDict.containsKey(favoriteVideo)) {
-                    this.movieDict.get(favoriteVideo).incrementNumFavorites();
-                    if (userData.getSubscriptionType().equals(Constants.PREMIUM)) {
-                        this.movieDict.get(favoriteVideo).incrementNumPremiumFavorites();
-                    }
-                } else if (this.showDict.containsKey(favoriteVideo)) {
-                    this.showDict.get(favoriteVideo).incrementNumFavorites();
-                    if (userData.getSubscriptionType().equals(Constants.PREMIUM)) {
-                        this.showDict.get(favoriteVideo).incrementNumPremiumFavorites();
-                    }
+                if (this.videoDict.containsKey(favoriteVideo)) {
+                    this.videoDict.get(favoriteVideo).incrementNumFavorites();
                 }
             }
 
             for (String videoTitle : userData.getHistory().keySet()) {
                 if (this.movieDict.containsKey(videoTitle)) {
-                    this.movieDict.get(videoTitle).addNumViews(userData.getHistory().get(videoTitle));
+                    this.movieDict.get(videoTitle).
+                            addNumViews(userData.getHistory().get(videoTitle));
                 } else if (this.showDict.containsKey(videoTitle)) {
-                    this.showDict.get(videoTitle).addNumViews(userData.getHistory().get(videoTitle));
+                    this.showDict.get(videoTitle).
+                            addNumViews(userData.getHistory().get(videoTitle));
                 }
             }
         }
@@ -88,58 +80,26 @@ public class Repository {
         this.arrayResult = arrayResult;
     }
 
-    private void writeMessage(int id, String field, String message) throws IOException {
-        JSONObject data = this.fileWriter.writeFile(id, field, message);
+    private void writeMessage(final int id, final String message) throws IOException {
+        JSONObject data = this.fileWriter.writeFile(id, "", message);
         this.arrayResult.add(data);
     }
 
-    private void runCommands(ActionInputData action) throws IOException {
+    private void runCommands(final ActionInputData action) throws IOException {
         User user = this.userDict.get(action.getUsername());
         if (action.getType().equals(Constants.FAVORITE)) {
-            String commandString = user.commandFavorite(action, this.movieDict, this.showDict);
-            writeMessage(action.getActionId(), "", commandString);
+            writeMessage(action.getActionId(),
+                         user.commandFavorite(action, this.videoDict));
         } else if (action.getType().equals(Constants.VIEW)) {
-            if (this.movieDict.containsKey(action.getTitle())) {
-                this.movieDict.get(action.getTitle()).addNumViews(1);
-            } else if (this.showDict.containsKey(action.getTitle())) {
-                this.showDict.get(action.getTitle()).addNumViews(1);
-            }
-
-            if (user.getHistory().containsKey(action.getTitle())) {
-                int numViews = user.getHistory().get(action.getTitle());
-                user.getHistory().put(action.getTitle(), numViews + 1);
-            } else {
-                user.getHistory().put(action.getTitle(), 1);
-            }
-            writeMessage(action.getActionId(), "", "success -> " + action.getTitle() + " was viewed with total views of " + user.getHistory().get(action.getTitle()));
-
+            writeMessage(action.getActionId(),
+                         user.commandView(action, this.videoDict));
         } else if (action.getType().equals(Constants.RATING)) {
-            if (user.getHistory().containsKey(action.getTitle())){
-                user.incrementNumRatings();
-                if (this.movieDict.containsKey(action.getTitle())) {
-                    if (user.getRatedMovies().contains(action.getTitle())) {
-                        writeMessage(action.getActionId(), "", "error -> " + action.getTitle() + " has been already rated" );
-                    } else {
-                        this.movieDict.get(action.getTitle()).addRating(action.getGrade(), 0);
-                        user.addToRatedMovies(action.getTitle());
-                        writeMessage(action.getActionId(), "", "success -> " + action.getTitle() + " was rated with " + action.getGrade() + " by " + action.getUsername());
-                    }
-                } else if (this.showDict.containsKey(action.getTitle())) {
-                    if (user.hasRatedShow(action.getTitle(), action.getSeasonNumber())) {
-                        writeMessage(action.getActionId(), "", "error -> " + action.getTitle() + " has been already rated" );
-                    } else {
-                        this.showDict.get(action.getTitle()).addRating(action.getGrade(), action.getSeasonNumber());
-                        user.addToRatedShows(action.getTitle(), action.getSeasonNumber());
-                        writeMessage(action.getActionId(), "", "success -> " + action.getTitle() + " was rated with " + action.getGrade() + " by " + action.getUsername());
-                    }
-                }
-            } else {
-                writeMessage(action.getActionId(), "", "error -> " + action.getTitle() + " is not seen");
-            }
+            writeMessage(action.getActionId(),
+                         user.commandRating(action, this.movieDict, this.videoDict));
         }
     }
 
-    private void runQueries(ActionInputData action) throws IOException {
+    private void runQueries(final ActionInputData action) throws IOException {
         if (action.getObjectType().equals(Constants.ACTORS)) {
             this.runActorQueries(action);
         } else if (action.getObjectType().equals(Constants.MOVIES)) {
@@ -151,66 +111,77 @@ public class Repository {
         }
     }
 
-    private void runActorQueries(ActionInputData action) throws IOException {
+    private void runActorQueries(final ActionInputData action) throws IOException {
         if (action.getCriteria().equals(Constants.AVERAGE)) {
-            String queryString = Actor.queryAverage(actorDict, movieDict, showDict, action);
-            writeMessage(action.getActionId(), "", queryString);
+            String queryString = Actor.queryAverage(actorDict, videoDict, action);
+            writeMessage(action.getActionId(), queryString);
         } else if (action.getCriteria().equals(Constants.AWARDS)) {
             String queryString = Actor.queryAwards(actorDict, action);
-            writeMessage(action.getActionId(), "", queryString);
+            writeMessage(action.getActionId(), queryString);
         } else if (action.getCriteria().equals(Constants.FILTER_DESCRIPTIONS)) {
             String queryString = Actor.queryFilterDescriptions(this.actorDict, action);
-            writeMessage(action.getActionId(), "", queryString);
+            writeMessage(action.getActionId(), queryString);
         }
     }
 
-    private void runVideoQueries(ActionInputData action, HashMap<String, Video> videoDict) throws IOException {
-        ArrayList<Video> videosFiltered = Video.findShows(videoDict, action.getFilters());
+    private void runVideoQueries(final ActionInputData action,
+                                 final HashMap<String, Video> dict) throws IOException {
+        ArrayList<Video> videosFiltered = Video.findShows(dict, action.getFilters());
         if (action.getCriteria().equals(Constants.RATINGS)) {
             String stringList = Video.queryRating(videosFiltered, action);
-            writeMessage(action.getActionId(), "", stringList);
+            writeMessage(action.getActionId(), stringList);
         } else if (action.getCriteria().equals(Constants.LONGEST)) {
             String stringList = Video.queryLongest(videosFiltered, action);
-            writeMessage(action.getActionId(), "", stringList);
+            writeMessage(action.getActionId(), stringList);
         } else if (action.getCriteria().equals(Constants.FAVORITE)) {
             String stringList = Video.queryFavorite(videosFiltered, action);
-            writeMessage(action.getActionId(), "", stringList);
+            writeMessage(action.getActionId(), stringList);
         } else if (action.getCriteria().equals(Constants.MOST_VIEWED)) {
             String stringList = Video.queryMostViewed(videosFiltered, action);
-            writeMessage(action.getActionId(), "", stringList);
+            writeMessage(action.getActionId(), stringList);
         }
     }
 
-    private void runUserQueries(ActionInputData action) throws IOException {
+    private void runUserQueries(final ActionInputData action) throws IOException {
         if (action.getCriteria().equals(Constants.NUM_RATINGS)) {
-            String stringList = User.getUsersQuery(this.userDict, action.getSortType(), action.getNumber());
-            writeMessage(action.getActionId(), "", "Query result: " + stringList);
+            writeMessage(action.getActionId(),
+                         User.getUsersQuery(this.userDict,
+                                            action));
         }
     }
 
-    private void runRecommendations(ActionInputData action) throws IOException {
+    private void runRecommendations(final ActionInputData action) throws IOException {
         User user = this.userDict.get(action.getUsername());
         if (action.getType().equals(Constants.STANDARD)) {
-            writeMessage(action.getActionId(), "", user.recommendStandard(this.videoSet, this.videoDict));
+            writeMessage(action.getActionId(),
+                         user.recommendStandard(this.videoSet, this.videoDict));
         } else if (action.getType().equals(Constants.BEST_UNSEEN)) {
-            writeMessage(action.getActionId(), "", user.recommendBestUnseen(this.videoSet, this.videoDict));
+            writeMessage(action.getActionId(),
+                         user.recommendBestUnseen(this.videoSet, this.videoDict));
         } else if (action.getType().equals(Constants.POPULAR)) {
-            writeMessage(action.getActionId(), "", user.recommendPopular(this.videoSet, this.videoDict));
+            writeMessage(action.getActionId(),
+                         user.recommendPopular(this.videoSet, this.videoDict));
         } else if (action.getType().equals(Constants.FAVORITE)) {
-            writeMessage(action.getActionId(), "", user.recommendFavorite(this.videoSet, this.videoDict));
+            writeMessage(action.getActionId(),
+                         user.recommendFavorite(this.videoSet, this.videoDict));
         } else if (action.getType().equals(Constants.SEARCH)) {
-            writeMessage(action.getActionId(), "", user.recommendSearch(this.videoSet, this.videoDict, action.getGenre()));
+            writeMessage(action.getActionId(),
+                         user.recommendSearch(this.videoSet, this.videoDict, action.getGenre()));
         }
     }
 
+    /**
+     * Main function of the class
+     * @throws IOException
+     */
     public void runActions() throws IOException {
         for (ActionInputData action : this.commandsData) {
             if (action.getActionType().equals(Constants.COMMAND)) {
-                runCommands(action);
+                this.runCommands(action);
             } else if (action.getActionType().equals(Constants.QUERY)) {
-                runQueries(action);
+                this.runQueries(action);
             } else if (action.getActionType().equals(Constants.RECOMMENDATION)) {
-                runRecommendations(action);
+                this.runRecommendations(action);
             }
         }
     }

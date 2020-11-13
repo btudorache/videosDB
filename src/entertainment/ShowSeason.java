@@ -8,7 +8,7 @@ import java.util.List;
  * <p>
  * DO NOT MODIFY
  */
-public final class Season {
+public final class ShowSeason {
     /**
      * Number of current season
      */
@@ -22,9 +22,9 @@ public final class Season {
      */
     private List<Double> ratings;
 
-    public Season(final int currentSeason, final int duration) {
-        this.currentSeason = currentSeason;
-        this.duration = duration;
+    public ShowSeason(final Season seasonData) {
+        this.currentSeason = seasonData.getCurrentSeason();
+        this.duration = seasonData.getDuration();
         this.ratings = new ArrayList<>();
     }
 
@@ -44,8 +44,12 @@ public final class Season {
         this.ratings = ratings;
     }
 
-    public int getCurrentSeason() {
-        return currentSeason;
+    /**
+     * Add
+     * @param rating
+     */
+    public void addRating(final double rating) {
+        this.ratings.add(rating);
     }
 
     @Override

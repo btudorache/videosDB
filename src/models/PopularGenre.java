@@ -1,15 +1,14 @@
 package models;
 
-import java.sql.Struct;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
-public class PopularGenre implements Comparable<PopularGenre> {
+public final class PopularGenre implements Comparable<PopularGenre> {
     private String genre;
     private int numViews;
 
-    public PopularGenre(String genre, int numViews) {
+    public PopularGenre(final String genre, final int numViews) {
         this.genre = genre;
         this.numViews = numViews;
     }
@@ -22,11 +21,20 @@ public class PopularGenre implements Comparable<PopularGenre> {
         return numViews;
     }
 
-    public void addViews(int views) {
+    /**
+     *
+     * @param views
+     */
+    public void addViews(final int views) {
         this.numViews += views;
     }
 
-    public static ArrayList<String> orderedMostPopularGeneres(HashMap<String, Video> videoDict) {
+    /**
+     *
+     * @param videoDict
+     * @return
+     */
+    public static ArrayList<String> orderedPopGeneres(final HashMap<String, Video> videoDict) {
         ArrayList<PopularGenre> popularGenreList = new ArrayList<>();
         HashMap<String, Integer> popGenre = new HashMap<>();
         for (Video video : videoDict.values()) {
@@ -52,7 +60,7 @@ public class PopularGenre implements Comparable<PopularGenre> {
     }
 
     @Override
-    public int compareTo(PopularGenre that) {
+    public int compareTo(final PopularGenre that) {
         return this.numViews - that.numViews;
     }
 }
