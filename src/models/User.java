@@ -25,7 +25,7 @@ public class User {
     private ArrayList<String> favoriteMovies;
 
     private ArrayList<String> ratedMovies;
-    private HashMap<String, HashMap<Integer, Boolean>> ratedShows;
+    private HashMap<String, HashSet<Integer>> ratedShows;
     private int numRatings;
 
     public User(UserInputData userData) {
@@ -63,12 +63,23 @@ public class User {
         return numRatings;
     }
 
-    public String commandFavorite(ActionInputData action) {
+    public String commandFavorite(ActionInputData action, HashMap<String, Video> movieDict, HashMap<String, Video> showDict) {
         if (this.getHistory().containsKey(action.getTitle())) {
             if (this.getFavoriteMovies().contains(action.getTitle())) {
                 return "error -> " + action.getTitle() + " is already in favourite list";
             } else {
                 this.getFavoriteMovies().add(action.getTitle());
+                if (movieDict.containsKey(action.getTitle())) {
+                    movieDict.get(action.getTitle()).incrementNumFavorites();
+                    if (this.getSubscriptionType().equals(Constants.PREMIUM)) {
+                        movieDict.get(action.getTitle()).incrementNumPremiumFavorites();
+                    }
+                } else if (showDict.containsKey(action.getTitle())) {
+                    showDict.get(action.getTitle()).incrementNumFavorites();
+                    if (this.getSubscriptionType().equals(Constants.PREMIUM)) {
+                        showDict.get(action.getTitle()).incrementNumPremiumFavorites();
+                    }
+                }
                 return "success -> " + action.getTitle() + " was added as favourite";
             }
         } else {
@@ -87,10 +98,20 @@ public class User {
             return "[]";
         }
 
+        Comparator<User> ratingsComparator = new Comparator<User>() {
+            @Override
+            public int compare(User user1, User user2) {
+                if (user1.getNumRatings() - user2.getNumRatings() == 0) {
+                    return user1.getUsername().compareTo(user2.getUsername());
+                } else {
+                    return user1.getNumRatings() - user2.getNumRatings();
+                }
+            }
+        };
         if (order.equals(Constants.ASCENDING)) {
-            userList.sort((user1, user2) -> user1.getNumRatings() - user2.getNumRatings());
+            userList.sort(ratingsComparator);
         } else if (order.equals(Constants.DESCENDING)) {
-            userList.sort((user1, user2) -> user2.getNumRatings() - user1.getNumRatings());
+            userList.sort(Collections.reverseOrder(ratingsComparator));
         }
 
         StringBuilder builder = new StringBuilder();
@@ -105,14 +126,13 @@ public class User {
         return builder.toString();
     }
 
-    public ArrayList<Video> getUnseenVideos(LinkedHashSet<String> videoSet, HashMap<String, Video> movieDict, HashMap<String, Video> showDict) {
-        videoSet.removeAll(getHistory().keySet());
+    public ArrayList<Video> getUnseenVideos(LinkedHashSet<String> videoSet, HashMap<String, Video> videoDict) {
+        LinkedHashSet<String> newSet = new LinkedHashSet<>(videoSet);
+        newSet.removeAll(getHistory().keySet());
         ArrayList<Video> videoList = new ArrayList<>();
-        for (String title : videoSet) {
-            if (movieDict.containsKey(title)) {
-                videoList.add(movieDict.get(title));
-            } else if (showDict.containsKey(title)) {
-                videoList.add(showDict.get(title));
+        for (String title : newSet) {
+            if (videoDict.containsKey(title)) {
+                videoList.add(videoList.size(), videoDict.get(title));
             }
         }
 
@@ -120,24 +140,22 @@ public class User {
     }
 
     public ArrayList<Video> getUnseenVideosByGenre(LinkedHashSet<String> videoSet,
-                                            HashMap<String, Video> movieDict,
-                                            HashMap<String, Video> showDict,
-                                            String genre) {
-        videoSet.removeAll(getHistory().keySet());
+                                                   HashMap<String, Video> videoDict,
+                                                   String genre) {
+        LinkedHashSet<String> newSet = new LinkedHashSet<>(videoSet);
+        newSet.removeAll(getHistory().keySet());
         ArrayList<Video> videoList = new ArrayList<>();
-        for (String title : videoSet) {
-            if (movieDict.containsKey(title) && movieDict.get(title).getGenres().contains(genre)) {
-                videoList.add(movieDict.get(title));
-            } else if (showDict.containsKey(title) && showDict.get(title).getGenres().contains(genre)) {
-                videoList.add(showDict.get(title));
+        for (String title : newSet) {
+            if (videoDict.containsKey(title) && videoDict.get(title).getGenres().contains(genre)) {
+                videoList.add(videoList.size(), videoDict.get(title));
             }
         }
 
         return videoList;
     }
 
-    public String recommendStandard(LinkedHashSet<String> videoSet, HashMap<String, Video> movieDict, HashMap<String, Video> showDict) {
-        ArrayList<Video> videoList = getUnseenVideos(videoSet, movieDict, showDict);
+    public String recommendStandard(LinkedHashSet<String> videoSet, HashMap<String, Video> videoDict) {
+        ArrayList<Video> videoList = getUnseenVideos(videoSet, videoDict);
         if (videoList.isEmpty()) {
             return "StandardRecommendation cannot be applied!";
         } else {
@@ -145,8 +163,8 @@ public class User {
         }
     }
 
-    public String recommendBestUnseen(LinkedHashSet<String> videoSet, HashMap<String, Video> movieDict, HashMap<String, Video> showDict) {
-        ArrayList<Video> videoList = getUnseenVideos(videoSet, movieDict, showDict);
+    public String recommendBestUnseen(LinkedHashSet<String> videoSet, HashMap<String, Video> videoDict) {
+        ArrayList<Video> videoList = getUnseenVideos(videoSet, videoDict);
 
         if (videoList.isEmpty()) {
             return "BestRatedUnseenRecommendation cannot be applied!";
@@ -162,23 +180,41 @@ public class User {
         }
     }
 
-    public String recommendFavorite(HashMap<String, Video> movieDict, HashMap<String, Video> showDict) {
-        ArrayList<Video> videoList = new ArrayList<>();
-        for (Video video : movieDict.values()) {
-            if (video.getNumFavorites() != 0 && !this.getFavoriteMovies().contains(video.getTitle())) {
-                videoList.add(video);
+    public String recommendPopular(LinkedHashSet<String> videoSet,
+                                   HashMap<String, Video> videoDict) {
+        ArrayList<Video> videoList = getUnseenVideos(videoSet, videoDict);
+
+        if (videoList.isEmpty() || !this.getSubscriptionType().equals(Constants.PREMIUM)) {
+            return "PopularRecommendation cannot be applied!";
+        }
+
+        ArrayList<String> genresOrdered = PopularGenre.orderedMostPopularGeneres(videoDict);
+
+        for (String genre : genresOrdered) {
+            for (Video video : videoList) {
+                if (video.getGenres().contains(genre)) {
+                    return "PopularRecommendation result: " + video.getTitle();
+                }
             }
         }
-        for (Video video : showDict.values()) {
-            if (video.getNumFavorites() != 0 && !this.getFavoriteMovies().contains(video.getTitle())) {
-                videoList.add(video);
+        return "PopularRecommendation cannot be applied!";
+    }
+
+    public String recommendFavorite(LinkedHashSet<String> videoSet,
+                                    HashMap<String, Video> videoDict) {
+        ArrayList<Video> videoList = new ArrayList<>();
+        for (String video : videoSet) {
+            if (videoDict.get(video).getNumFavorites() != 0 &&
+                !this.getHistory().containsKey(videoDict.get(video).getTitle())) {
+                videoList.add(videoList.size(), videoDict.get(video));
             }
         }
 
-        if (videoList.isEmpty()) {
+        Video searchedVideo = null;
+        if (videoList.isEmpty() || !this.getSubscriptionType().equals(Constants.PREMIUM)) {
             return "FavoriteRecommendation cannot be applied!";
         } else {
-            Video searchedVideo = videoList.get(0);
+            searchedVideo = videoList.get(0);
             for (Video video : videoList) {
                 if (video.getNumFavorites() > searchedVideo.getNumFavorites()) {
                     searchedVideo = video;
@@ -186,14 +222,13 @@ public class User {
             }
 
         }
-        return "FavoriteRecommendation result: " + videoList.get(0).getTitle();
+        return "FavoriteRecommendation result: " + searchedVideo.getTitle();
     }
 
     public String recommendSearch(LinkedHashSet<String> videoSet,
-                                  HashMap<String, Video> movieDict,
-                                  HashMap<String, Video> showDict,
+                                  HashMap<String, Video> videoDict,
                                   String genre) {
-        ArrayList<Video> videoList = getUnseenVideosByGenre(videoSet, movieDict, showDict, genre);
+        ArrayList<Video> videoList = getUnseenVideosByGenre(videoSet, videoDict, genre);
         if (videoList.isEmpty() || !this.getSubscriptionType().equals(Constants.PREMIUM)) {
             return "SearchRecommendation cannot be applied!";
         } else {
@@ -214,15 +249,29 @@ public class User {
         return ratedMovies;
     }
 
-    public HashMap<String, HashMap<Integer, Boolean>> getRatedShows() {
-        return ratedShows;
-    }
-
     public void addToRatedMovies(String title) {
         this.getRatedMovies().add(title);
     }
 
     public void addToRatedShows(String title, int season) {
+        if (!this.ratedShows.containsKey(title)) {
+            HashSet<Integer> set = new HashSet<>();
+            set.add(season);
+            this.ratedShows.put(title, set);
+        } else {
+            this.ratedShows.get(title).add(season);
+        }
+    }
 
+    public boolean hasRatedShow(String title, int season) {
+        if (this.ratedShows.containsKey(title)) {
+            if (this.ratedShows.get(title).contains(season)) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 }

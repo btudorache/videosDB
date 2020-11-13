@@ -5,6 +5,7 @@ import common.Constants;
 import fileio.ActionInputData;
 import fileio.ActorInputData;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
 public class Actor {
@@ -25,13 +26,17 @@ public class Actor {
      */
     private HashMap<String, Movie> filmographyDict;
 
-    private Map<ActorsAwards, Integer> awards;
+    private Map<String, Integer> awards;
 
     public Actor(ActorInputData actorData) {
         this.name = actorData.getName();
         this.careerDescription = actorData.getCareerDescription();
         this.filmography = actorData.getFilmography();
-        this.awards = actorData.getAwards();
+        this.filmographyDict = new HashMap<>();
+        this.awards = new HashMap<>();
+        for (ActorsAwards actorAward : actorData.getAwards().keySet()) {
+            this.awards.put(actorAward.toString(), actorData.getAwards().get(actorAward));
+        }
 
         this.filmographyDict = new HashMap<>();
     }
@@ -48,7 +53,7 @@ public class Actor {
         return filmography;
     }
 
-    public Map<ActorsAwards, Integer> getAwards() {
+    public Map<String, Integer> getAwards() {
         return awards;
     }
 
@@ -130,14 +135,14 @@ public class Actor {
 
     public static String queryFilterDescriptions(HashMap<String, Actor> actorDict, ActionInputData action) {
         ArrayList<Actor> actorList = new ArrayList<>();
-        actorLoop:
+
         for (Actor actor : actorDict.values()) {
-            for (String keyWord : action.getFilters().get(2)) {
-                if (!actor.getCareerDescription().toLowerCase().contains(keyWord)) {
-                    break actorLoop;
-                }
+            String replacedString = actor.getCareerDescription().replaceAll("[!?,.\"()'-]", " ");
+            String[] words = replacedString.toLowerCase().split("\\s+");
+            HashSet<String> wordsSet = new HashSet<>(Arrays.asList(words));
+            if (wordsSet.containsAll(action.getFilters().get(2))) {
+                actorList.add(actor);
             }
-            actorList.add(actor);
         }
 
         if (actorList.isEmpty()) {

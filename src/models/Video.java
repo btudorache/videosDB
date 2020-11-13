@@ -3,7 +3,6 @@ package models;
 import common.Constants;
 import fileio.ActionInputData;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
 public abstract class Video implements Comparable<Video> {
@@ -29,6 +28,7 @@ public abstract class Video implements Comparable<Video> {
     protected double rating;
     protected int numRatings;
     protected int numFavorites;
+    protected int numPremiumFavorites;
     protected int numViews;
 
     public Video(final String title, final int year, final ArrayList<String> cast, final ArrayList<String> genres) {
@@ -39,11 +39,16 @@ public abstract class Video implements Comparable<Video> {
         this.rating = 0;
         this.numRatings = 0;
         this.numFavorites = 0;
+        this.numPremiumFavorites = 0;
         this.numViews = 0;
     }
 
     public void incrementNumFavorites() {
         this.numFavorites++;
+    }
+
+    public void incrementNumPremiumFavorites() {
+        this.numPremiumFavorites++;
     }
 
     public void addNumViews(int views) {
@@ -84,10 +89,15 @@ public abstract class Video implements Comparable<Video> {
         return numViews;
     }
 
+    public int getNumPremiumFavorites() {
+        return numPremiumFavorites;
+    }
+
     public static ArrayList<Video> findShows(HashMap<String, Video> videos, List<List<String>> filters) {
         ArrayList<Video> videoList = new ArrayList<>();
         // if both filter present
-        if (filters.get(0) != null && filters.get(1) != null) {
+        if (filters.get(0) != null && filters.get(0).get(0) != null &&
+            filters.get(1) != null && filters.get(1).get(0) != null) {
             for (Video video : videos.values()) {
                 if (filters.get(0).get(0) != null &&
                         video.getYear() == Integer.parseInt(filters.get(0).get(0)) &&
@@ -96,14 +106,14 @@ public abstract class Video implements Comparable<Video> {
                 }
             }
             // if only year filter
-        } else if (filters.get(0) != null) {
+        } else if (filters.get(0) != null && filters.get(0).get(0) != null) {
             for (Video video : videos.values()) {
                 if (video.getYear() == Integer.parseInt(filters.get(0).get(0))) {
                     videoList.add(video);
                 }
             }
             // if only genre filter
-        } else if (filters.get(1) != null) {
+        } else if (filters.get(1) != null && filters.get(1).get(0) != null) {
             for (Video video : videos.values()) {
                 if (video.getGenres().containsAll(filters.get(1))) {
                     videoList.add(video);
