@@ -4,40 +4,28 @@ import actor.ActorsAwards;
 import common.Constants;
 import fileio.ActionInputData;
 import fileio.ActorInputData;
+import models.video.Video;
 
 import java.util.*;
 
+/**
+ * Actor class used to model actor data
+ */
 public final class Actor {
-    /**
-     * actor name
-     */
-    private String name;
-    /**
-     * description of the actor's career
-     */
-    private String careerDescription;
-    /**
-     * videos starring actor
-     */
-    private ArrayList<String> filmography;
-    /**
-     * awards won by the actor
-     */
-    private HashMap<String, Movie> filmographyDict;
-
-    private Map<String, Integer> awards;
+    private final String name;
+    private final String careerDescription;
+    private final ArrayList<String> filmography;
+    private final Map<String, Integer> awards;
 
     public Actor(final ActorInputData actorData) {
         this.name = actorData.getName();
         this.careerDescription = actorData.getCareerDescription();
         this.filmography = actorData.getFilmography();
-        this.filmographyDict = new HashMap<>();
         this.awards = new HashMap<>();
         for (ActorsAwards actorAward : actorData.getAwards().keySet()) {
             this.awards.put(actorAward.toString(), actorData.getAwards().get(actorAward));
         }
 
-        this.filmographyDict = new HashMap<>();
     }
 
     public String getName() {
@@ -70,8 +58,8 @@ public final class Actor {
 
     /**
      * Gets filmography rating mean of the actor
-     * @param videoDict
-     * @return
+     * @param videoDict map containing all the movies
+     * @return mean of the actor
      */
     public Double getFilmographyRatingMean(final HashMap<String, Video> videoDict) {
         double mean = 0;
@@ -89,6 +77,12 @@ public final class Actor {
         return mean / numVideosInDatabase;
     }
 
+    /**
+     * parses and actor list to string
+     * @param actorList list of actors
+     * @param numberOfElements number of actor to be parsed
+     * @return string of actors
+     */
     private static String parseActorList(final ArrayList<Actor> actorList,
                                          final int numberOfElements) {
         StringBuilder builder = new StringBuilder();
@@ -104,6 +98,12 @@ public final class Actor {
         return builder.toString();
     }
 
+    /**
+     * function that sorts a given list using a specific comparator and specific order
+     * @param order order in which the list to be sorted (ascending or descending)
+     * @param actorList actor list to be sorded
+     * @param comparator comparator using for sorting
+     */
     private static void sortByOrder(final ArrayList<Actor> actorList,
                                     final String order,
                                     final Comparator<Actor> comparator) {
@@ -115,11 +115,11 @@ public final class Actor {
     }
 
     /**
-     *
-     * @param actorDict
-     * @param videoDict
-     * @param action
-     * @return
+     * query actors by filmography mean
+     * @param actorDict map of all actors
+     * @param videoDict map of all videos
+     * @param action action data
+     * @return result string of query
      */
     public static String queryAverage(final HashMap<String, Actor> actorDict,
                                       final HashMap<String, Video> videoDict,
@@ -134,16 +134,14 @@ public final class Actor {
         if (actorList.isEmpty()) {
             return "Query result: []";
         } else {
-            Comparator<Actor> averageActorComparator = new Comparator<Actor>() {
-                @Override
-                public int compare(final Actor actor1, final Actor actor2) {
-                    if (Double.compare(actor1.getFilmographyRatingMean(videoDict),
-                                       actor2.getFilmographyRatingMean(videoDict)) == 0) {
-                        return actor1.getName().compareTo(actor2.getName());
-                    } else {
-                        return Double.compare(actor1.getFilmographyRatingMean(videoDict),
-                                              actor2.getFilmographyRatingMean(videoDict));
-                    }
+            // comparator used for sorting
+            Comparator<Actor> averageActorComparator = (actor1, actor2) -> {
+                if (Double.compare(actor1.getFilmographyRatingMean(videoDict),
+                                   actor2.getFilmographyRatingMean(videoDict)) == 0) {
+                    return actor1.getName().compareTo(actor2.getName());
+                } else {
+                    return Double.compare(actor1.getFilmographyRatingMean(videoDict),
+                                          actor2.getFilmographyRatingMean(videoDict));
                 }
             };
 
@@ -153,16 +151,17 @@ public final class Actor {
     }
 
     /**
-     *
-     * @param actorDict
-     * @param action
-     * @return
+     * query actors by filter description
+     * @param actorDict map of all actors
+     * @param action action data
+     * @return result string of query
      */
     public static String queryFilterDescriptions(final HashMap<String, Actor> actorDict,
                                                  final ActionInputData action) {
         ArrayList<Actor> actorList = new ArrayList<>();
 
         for (Actor actor : actorDict.values()) {
+            // getting all the words in the description
             String replacedString = actor.getCareerDescription().replaceAll("[!?,.\"()'-]", " ");
             String[] words = replacedString.toLowerCase().split("\\s+");
             HashSet<String> wordsSet = new HashSet<>(Arrays.asList(words));
@@ -174,23 +173,19 @@ public final class Actor {
         if (actorList.isEmpty()) {
             return "Query result: []";
         } else {
-            Comparator<Actor> compareByName = new Comparator<Actor>() {
-                @Override
-                public int compare(final Actor actor1, final Actor actor2) {
-                    return actor1.getName().compareTo(actor2.getName());
-                }
-            };
-
+            // comparator used for sorting
+            Comparator<Actor> compareByName = (actor1, actor2) ->
+                    actor1.getName().compareTo(actor2.getName());
             sortByOrder(actorList, action.getSortType(), compareByName);
             return parseActorList(actorList, action.getNumber());
         }
     }
 
     /**
-     *
-     * @param actorDict
-     * @param action
-     * @return
+     * query actors by awards
+     * @param actorDict map of all actors
+     * @param action action data
+     * @return result string of query
      */
     public static String queryAwards(final HashMap<String, Actor> actorDict,
                                      final ActionInputData action) {
@@ -205,14 +200,11 @@ public final class Actor {
         if (actorList.isEmpty()) {
             return "Query result: []";
         } else {
-            Comparator<Actor> compareByNumAwards = new Comparator<Actor>() {
-                @Override
-                public int compare(final Actor actor1, final  Actor actor2) {
-                    if (actor1.getNumAwards() - actor2.getNumAwards() == 0) {
-                        return actor1.getName().compareTo(actor2.getName());
-                    } else {
-                        return actor1.getNumAwards() - actor2.getNumAwards();
-                    }
+            Comparator<Actor> compareByNumAwards = (actor1, actor2) -> {
+                if (actor1.getNumAwards() - actor2.getNumAwards() == 0) {
+                    return actor1.getName().compareTo(actor2.getName());
+                } else {
+                    return actor1.getNumAwards() - actor2.getNumAwards();
                 }
             };
 

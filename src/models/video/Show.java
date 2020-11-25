@@ -1,22 +1,17 @@
-package models;
+package models.video;
 
 import entertainment.Season;
-import entertainment.ShowSeason;
 import fileio.SerialInputData;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public final class Show extends Video  {
-    /**
-     * Number of seasons
-     */
+/**
+ * Class for Show. Extends Video class
+ */
+public final class Show extends Video {
     private final int numberOfSeasons;
-    /**
-     * Season list
-     */
     private final ArrayList<ShowSeason> seasons;
-
 
     public Show(final SerialInputData showData) {
         super(showData.getTitle(), showData.getYear(), showData.getCast(), showData.getGenres());
@@ -36,24 +31,29 @@ public final class Show extends Video  {
     }
 
     /**
-     *
-     * @param rate
-     * @param seasonNum
+     * adds rating to a season
+     * @param rate rating to be added
+     * @param seasonNum number of season rated
      */
     public void addRating(final double rate, final int seasonNum) {
         this.getSeasons().get(seasonNum - 1).addRating(rate);
     }
 
+    /**
+     * Gets the rating of the shows.
+     * Calculated as the mean of every season's average rating
+     * @return rating of show
+     */
     @Override
     public double getRating() {
         double sum = 0;
-        int numRatings = 0;
         for (ShowSeason season : this.getSeasons()) {
             List<Double> doubleArrayList = season.getRatings();
             double seasonMean = 0;
             for (Double rating : doubleArrayList) {
                 seasonMean += rating;
             }
+
             if (seasonMean != 0) {
                 seasonMean /= doubleArrayList.size();
             }
@@ -66,6 +66,12 @@ public final class Show extends Video  {
         sum /= this.getSeasons().size();
         return sum;
     }
+
+    /**
+     * Gets the duration of the Show.
+     * Calculated as the sum of every season duration
+     * @return duration
+     */
     @Override
     public int getDuration() {
         int duration = 0;

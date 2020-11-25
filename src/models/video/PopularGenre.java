@@ -1,11 +1,16 @@
-package models;
+package models.video;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
+/**
+ * Class used to model a Genre with number of views.
+ * Used to sort genres.
+ * Implements Comparable interface, used to sort by number of views
+ */
 public final class PopularGenre implements Comparable<PopularGenre> {
-    private String genre;
+    private final String genre;
     private int numViews;
 
     public PopularGenre(final String genre, final int numViews) {
@@ -22,19 +27,19 @@ public final class PopularGenre implements Comparable<PopularGenre> {
     }
 
     /**
-     *
-     * @param views
+     * adds views to this genre
+     * @param views number of views to be added
      */
     public void addViews(final int views) {
         this.numViews += views;
     }
 
     /**
-     *
-     * @param videoDict
-     * @return
+     * sorts genres by number of views
+     * @param videoDict list of all videos
+     * @return list of sorted genres
      */
-    public static ArrayList<String> orderedPopGeneres(final HashMap<String, Video> videoDict) {
+    public static ArrayList<String> orderedPopularGeneres(final HashMap<String, Video> videoDict) {
         ArrayList<PopularGenre> popularGenreList = new ArrayList<>();
         HashMap<String, Integer> popGenre = new HashMap<>();
         for (Video video : videoDict.values()) {
@@ -59,6 +64,12 @@ public final class PopularGenre implements Comparable<PopularGenre> {
         return genresOrdered;
     }
 
+    /**
+     * Implementation of the comparable interface.
+     * The sorting is done by number of views
+     * @param that PopularGenre object to be compared to
+     * @return result of the comparing
+     */
     @Override
     public int compareTo(final PopularGenre that) {
         return this.numViews - that.numViews;
