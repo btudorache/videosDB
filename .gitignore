@@ -2,6 +2,5 @@ out/
 .idea/
 result/
 *.iml
-README
 checkstyle.txt
 out.txt

@@ -1,0 +1,95 @@
+Tudorache Bogdan-Mihai 324CA
+
+POO Tema 1 - VideosDB
+
+# Introducere
+
+    Structura generala a codului este urmatoarea:
+
+    Toate clasele scrise pentru tema se afla in pachetele database si models.
+
+    In clasa Repository din pachetul database se afla toate datele din baza de date data ca input si logica rularii actiunilor.
+
+    In clasele din pachetul models se afla tipurile de date modelate din baza de date. Actiunile care se pot aplica
+    pe baza de date se afla in clasa in care are 'cel mai mult sens' sa se afle (comenzile si recomandarile se afla
+    in clasa User, query-urile pe useri se afla in clasa User, query-urile pe video-uri se afla in clasa Video,
+    query-urile pe actori se afla in clasa Actor).
+
+# Clase - Descrierea claselor folosite
+
+    # Repository #
+
+    Clasa contine toate datele necesare si logica rularii actiunilor. Din functia principala runActions() se cauta prin
+    filtrare actiunea specifica care trebuie apelata.
+
+    Datele de tipurile claselor din models sunt memorate in dictionare asociate fiecarui tip de date. Am folosit si un
+    LinkedHashSet pe numele video-urilor pentru implementarea recomandarilor.
+
+    Clasa primeste ca input si obiectele de tip Writer si JSONArray pentru a facilita scrierea la output a rezultatelor.
+
+    In constructor, pe langa citirea datelor din input si pastrarea lor, se face si o procesare initiala a datelor deja
+    existente, pentru a usura actiunile viitoare.
+
+
+
+    # Video #
+
+    Clasa abstracta care functioneaza ca o baza pentru Movie si Show. Contine datele necesare pentru a face query-uri
+    pe video-uri si contine si tipurile de query (metodele) asociate pentru video-uri.
+
+    Implementeaza interfata Comparable, criteriul de comparare general fiind ratingul filmelor.
+
+    Fiecare query este implementat printr-o metoda statica specifica, si exista si functii auxiliare ce ajuta in
+    creearea query-urilor.
+
+
+
+    # Movie #
+
+    Subclasa a clasei Video. Contine implementari specifice unui film pentru funcionalitati generale ale unui video.
+
+
+
+    # Show #
+
+    Subclasa a clasei Video. Contine implementari specifice unui serial pentru funcionalitati generale ale unui video.
+
+
+
+    # ShowSeason #
+
+    Clasa care modeleaza un sezon al unui serial. Contine toate datele asociate unui serial si metode folositoare pentru query-uri.
+
+
+
+    # PopularGenre #
+
+    Clasa folosita in primul rand pentru recomandarea PopularRecommend. Contine informatii folositoare despre genuri
+    si se ocupa de sortarea lor dupa rating.
+
+
+
+    # Actor #
+
+    Clasa folosita pentru a modela informatiile despre un actor. Contine toate datele necesare pentru a face
+    query-uri, si contine de asemenea metodele care ruleaza query-urile pe actori.
+
+    Fiecare query este implementat printr-o metoda statica specifica, si exista si functii auxiliare ce ajuta in
+    creearea query-urilor.
+
+
+    # User #
+
+    Clasa care modeleaza un User. Contine toate informatiile necesare pentru un user, si de aici se aplica toate
+    comenzile si toate recomandarile.
+
+    Clasa contine cea mai mare parte a codului. contine campuri si metode pentru a memora diferite informatii, cum ar
+    fi daca un user a dat deja rating unui film sau serial.
+
+    Toate comenzile sunt implementate ca niste metode din clasa User. De asemenea toate recomandarile sunt si ele
+    implementate ca niste metode din clasa User. Pentru recomandari exista functii auxiliare care modularizeaza
+    implementarea.
+
+
+
+
