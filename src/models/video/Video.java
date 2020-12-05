@@ -99,7 +99,7 @@ public abstract class Video implements Comparable<Video> {
      * function that filters given video list by the given filters
      * @param videos map of videos to be filtered
      * @param filters list of filters
-     * @return list of filteres shows
+     * @return list of filters shows
      */
     public static ArrayList<Video> findShows(final HashMap<String, Video> videos,
                                              final List<List<String>> filters) {
