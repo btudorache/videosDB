@@ -66,7 +66,7 @@ Acestea reprezintă căutări după video-uri ale utilizatorilor. Ele sunt *part
 * **Favorite** - întoarce videoclipul care e cel mai des intalnit in lista de favorite a tuturor utilizatorilor.
 * **Search** - toate videoclipurile nevăzute de user dintr-un anumit gen, dat ca filtru în input.
 
-Cerintele si detaliile complete se gasesc in [enuntul problemei](https://github.com/btudorache/videosDB/blob/master/Programare_2019___Tema_3.pdf)
+Cerintele si detaliile complete se gasesc in [enuntul problemei](https://github.com/btudorache/videosDB/blob/master/Enunt_POO_Tema1.pdf)
 
 ## Notes ##
 Clasele implementate de mine se gasesc in pachetele *models* si *database*. Celelalte sunt pachete auxiliare utilizate pentru
