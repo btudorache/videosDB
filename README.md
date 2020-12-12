@@ -9,11 +9,7 @@ Platforma pe care o veți implementa simulează acțiuni pe care le pot face uti
 
 **Entitățile** pe care le veți modela vor fi:
 * Video
-    * De două tipuri: filme și seriale (shows). Diferența dintre ele este că serialele au sezoane.
-
-* User
-    * Are două categorii: standard și premium
-    
+* User 
 * Actor
     
 Datele pentru aceste entități sunt încărcate din fișierele JSON oferite ca intrare în teste. Ele sunt ținute într-un **Repository**.
@@ -67,10 +63,8 @@ Acestea reprezintă căutări după video-uri ale utilizatorilor. Ele sunt *part
 
 **Doar pentru utilizatorii premium:**
 
-* **Popular** - întoarce primul video nevizualizat din cel mai popular gen (video-urile se parcurg conform oridinii din baza de date). 
-Popularitatea genului se calculează din numărul de vizualizări totale ale videoclipurile de acel gen. In cazul in care toate videoclipurile din cel mai popular gen sunt vizionate de utilizator, atunci se trece la urmatorul gen cel mai popular.
-
-* **Favorite** - întoarce videoclipul care e cel mai des intalnit in lista de favorite a tuturor utilizatorilor, al doilea criteriu fiind ordinea de aparitie din baza de date.
+* **Popular** - întoarce primul video nevizualizat din cel mai popular gen. 
+* **Favorite** - întoarce videoclipul care e cel mai des intalnit in lista de favorite a tuturor utilizatorilor.
 * **Search** - toate videoclipurile nevăzute de user dintr-un anumit gen, dat ca filtru în input.
 
 Cerintele si detaliile complete se gasesc in [enuntul problemei](https://github.com/btudorache/videosDB/blob/master/Programare_2019___Tema_3.pdf)
