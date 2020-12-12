@@ -71,5 +71,5 @@ Cerintele si detaliile complete se gasesc in [enuntul problemei](https://github.
 
 ## Notes ##
 Clasele implementate de mine se gasesc in pachetele *models* si *database*. Celelalte sunt pachete auxiliare utilizate pentru
-parsare oferite de *echipa POO seriile CA, CD* de la *Facultatea de Automatica si Calculatoare, Universitatea Politehnica Bucuresti*.
+parsare JSON si pentru testare oferite de *echipa POO seriile CA, CD* de la *Facultatea de Automatica si Calculatoare, Universitatea Politehnica Bucuresti*.
 
