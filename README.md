@@ -1,4 +1,4 @@
-# POO Tema 1 - VideosDB
+# Programare Orientata pe Obiecte - Tema 1
 
 În cadrul acestei teme veți implementa o platformă simplificată ce oferă informații despre filme și despre seriale. 
 Utilizatorii pot să primească recomandări personalizate pe baza preferințelor.
